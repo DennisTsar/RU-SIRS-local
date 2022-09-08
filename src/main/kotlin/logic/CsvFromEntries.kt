@@ -1,0 +1,66 @@
+package logic
+
+import general.Entry
+import misc.roundToDecimal
+
+fun csvFromEntries(entries: List<Entry>): String? {
+    val names = entries.map { formatName(it.instructor) }
+    val mapOfProfs = entries.groupBy { parseName(it.instructor, names) }
+        .filterKeys { it.isNotEmpty() && it != "TA" }
+
+    val profRatings = mapOfProfs.filter { it.value.isNotEmpty() }
+        .mapValues { (k, v) ->
+            v.map { i ->
+                i.scores.chunked(10)//grouped by question
+                    .map {
+                        it.subList(0, 5).flatMapIndexed { index, d ->
+                            List(d.toInt()) { index + 1 }
+                        }
+                    }//maps to all answers as list
+                //ex. 2 5s and 3 4s gives [5,5,4,4,4]
+                //this allows for keeping total # of responses and average calculation after flattening
+            }
+                .flatMap { it.withIndex() }
+                .groupBy({ it.index }, { it.value }).values
+                .map { it.flatten() }
+        }
+
+    if (profRatings.isEmpty())
+        return null
+
+    val profAves = profRatings.map {
+        val row = it.value[8]//This is the teaching effectiveness question
+        Pair(it.key, Pair(row.average().roundToDecimal(2), row.size))
+    }
+
+    val deptAve = profAves.map { it.second.first }.average().roundToDecimal(2)
+    val totalNum = profAves.sumOf { it.second.second }
+
+    val csv = (profAves + Pair("Average", Pair(deptAve, totalNum)))
+        .sortedBy { -it.second.first }
+        .joinToString("\n") { "${it.first};${it.second.first};${it.second.second}" }
+    return "Professor;Rating;Total Responses\n$csv"
+}
+
+fun formatName(name: String): String {
+    return name.replace(Regex(" \\(.*\\)|,"), "")//removes stuff in parentheses & removes commas
+        .split(" ")
+        .run {
+            get(0) + (getOrNull(1)?.let { ", ${it.first()}" } ?: "")//Adds first initial if present
+        }.uppercase()
+}
+
+//This exists so that "Smith" and "Smith, John" are grouped together IFF John is the only Smith in the department
+fun parseName(name: String, names: List<String>): String {
+    with(formatName(name)) {
+        if (contains(','))
+            return this
+
+        val filtered = names.filter {
+            val split = it.split(',')
+            split[0] == this && split.size > 1
+        }.toSet()
+
+        return if (filtered.size == 1) filtered.first() else this
+    }
+}
