@@ -19,5 +19,5 @@ data class CoreCode(
     val supplement: String,
     val term: String,
     val unit: String,
-    val year: String
+    val year: String,
 )

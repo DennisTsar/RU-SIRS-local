@@ -9,5 +9,5 @@ data class Unit(
     val code: String,
     val description: String,
     val homeCampus: String,
-    val level: String
+    val level: String,
 )

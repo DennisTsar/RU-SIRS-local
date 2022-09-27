@@ -3,7 +3,7 @@ package dto
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class School(
+data class DescriptionHolder(
     val code: String,
-    val description: String
+    val description: String,
 )

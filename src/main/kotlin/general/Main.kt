@@ -1,27 +1,73 @@
 package general
 
-import api.Repository
+import api.LocalApi
+import api.SIRSApi
+import api.SOCApi
+import api.interfaces.EntriesRepository
 import dto.Course
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import logic.GetEntriesMap
-import logic.csvFromEntries
-import logic.formatName
-import logic.parseName
+import logic.mapByProfs
+import logic.mapByProfs2
 import misc.makeFileAndDir
 import misc.pmap
+import old_data.EntryOld3
 
 val globalSetOfQs = mutableSetOf<String>()
 
 fun main() {
-    val repository = Repository()
+//    val repo = SIRSApi(SIRS_API_KEY)
+//    runBlocking {
+//        val a = repo.getSchoolsMapUsingSOC()
+////            .forEach { (k,v) -> println(k); println(v)  }
+//        val r = a.toList().sortedBy { it.first }.toMap()
+//            .let {
+//                val file = makeFileAndDir("extra-json-data/schoolDeptsMap4.json")
+//                file.writeText(Json.encodeToString(it))
+//            }
+//        println(Json.encodeToString(r))
+////        println(SOCApi().getSOCData().units.map { it.code })
+//    }
 
-//    val schoolDeptsMap =
-//        GetSchoolsMap.fromLocalCode()
+//    completeOverwrite()
 
-    getInstructors(repository, writeDir = "extra-json-data/F22-instructors")
+    val schoolsMapRepository = LocalApi()
+
+    val depts = runBlocking { LocalApi().getSchoolsMap()["01"]!! }.depts
+
+    for(i in depts){
+        val entries = runBlocking { schoolsMapRepository.getEntries("01", i) }
+
+        val a = entries.mapByProfs()
+        val b = entries.mapByProfs2()
+
+        a.forEach { (k, v) ->
+            val s = b[k] ?: run { println("no2: $k $i"); return@forEach }
+            if(s != v)
+                println("no $k $i")
+        }
+    }
+//
+//    val q = entries.mapByProfs()
+//        .filterValues(List<Entry>::isNotEmpty)
+//        .mapValues { (_, entries) ->
+//            entries.filter { it.scores.size >= 100 } // needed for zip to work & good for clean data anyway
+//                .map { entry ->
+//                    // group by question (there are 10 nums in table per question)
+//                    // + we only care about first 5 nums per Q (the actual ratings) which are all int amounts
+//                    entry.scores.chunked(10)
+//                        .map { it.subList(0, 5).map(Double::toInt) }
+//                }.reduce { accByQuestion, responsesByQ ->
+//                    // nums from each entry get zipped with each other, by question
+//                    accByQuestion.zip(responsesByQ) { accRatings, ratings ->
+//                        accRatings.zip(ratings, Int::plus)
+//                    }
+//                }
+//        }.forEach(::println)
+
+
+//    getInstructors(SOCApi(), writeDir = "extra-json-data/F22-instructors2")
 
 //    runBlocking {
 //        val socRes = repository.getSOCData()
@@ -75,22 +121,19 @@ fun main() {
 //    schoolMapToCode(Json.decodeFromString(File("json-data/schoolDeptsMap.txt").readText()))
 
 //    val map =
-//        GetEntriesMap.fromLocalFile<Entry>("json-data-6/")
-//    map.forEach { (school, deptMap) ->
+//        GetEntriesMap.fromLocalFile<Entry>("json-data-7/")
+//    map.map { (school, deptMap) ->
 //        deptMap.map { (dept, entries) ->
-////            listOf(school,dept) to (entries.profNumFromEntries() ?: 0)
-//            var a: Map<String, List<Entry>> = emptyMap()
-//            var b: Map<String, List<Entry>> = emptyMap()
-//            val r = measureNanoTime {
-//                b = entries.profNumFromEntriesA()
+//            var z: Map<String, List<Entry>> = emptyMap()
+//            var zz: Map<String, List<Entry>> = emptyMap()
+////            val b = measureNanoTime {
+////                zz = entries.mapByProfs2()
+////            }
+//            measureNanoTime {
+//                z = entries.mapByProfs2()
 //            }
-//            val rr = measureNanoTime {
-//                a = entries.profNumFromEntriesB()
-//            }
-//
-//            println("${r>rr}")
-//        }
-//    }//.sortedBy { -it.second }//.forEach(::println)
+//        }.sum()
+//    }.run { println(sum()) }//.sortedBy { -it.second }//.forEach(::println)
 //        runBlocking { GetEntriesMap.fromGit<EntryOld2>(repository,schoolDeptsMap) }
 
 
@@ -158,60 +201,13 @@ fun main() {
 //    }
 }
 
-fun List<Entry>.profNumFromEntries(): Int {
-    val names = map { formatName(it.instructor) }
-    val mapOfProfs = groupBy { parseName(it.instructor, names) }
-        .filterKeys { it.isNotEmpty() && it != "TA" }
-
-    return groupBy {
-        parseName(formatName(it.instructor), names)
-    }.filterKeys { it.isNotEmpty() && it != "TA" }.size
-}
-
-fun List<Entry>.profNumFromEntriesA(): Map<String, List<Entry>> {
-    val names = map { formatName(it.instructor) }.distinct().groupBy {
-        it.substringBefore(",")
-    }.filterValues { it.size == 2 }
-        .mapValues {
-            it.value.first { j -> j.contains(",") }
-        }
-
-    map { formatName(it.instructor) }.toSet().distinctBy { }
-
-    return groupBy {
-        parseName2(formatName(it.instructor), names)
-    }.filterKeys { it.isNotEmpty() && it != "TA" }
-}
-
-fun List<Entry>.profNumFromEntriesB(): Map<String, List<Entry>> {
-    val names = map { formatName(it.instructor) }.toSet().groupBy {
-        it.substringBefore(",")
-    }.filterValues { it.size == 2 }
-        .mapValues {
-            it.value.first { j -> j.contains(",") }
-        }
-
-    map { formatName(it.instructor) }.toSet().distinctBy { }
-
-    return groupBy {
-        parseName2(formatName(it.instructor), names)
-    }.filterKeys { it.isNotEmpty() && it != "TA" }
-}
-
-private fun parseName2(name: String, names: Map<String, String>): String {
-//    if (name.contains(','))
-//        return name
-    return names[name] ?: name
-}
-
 // Used to keep old entries that have been removed from website
 fun getOldEntriesFromLocal(): Map<String, Map<String, List<Entry>>> {
-    return GetEntriesMap.fromLocalFile<EntryOld2>("json-data-4").mapValues { (_, entriesByDept) ->
+    return LocalApi().getAllEntriesInDir<EntryOld3>("json-data-4").mapValues { (_, entriesByDept) ->
         entriesByDept.mapValues { (_, oldEntries) ->
             oldEntries.filter { it.term == "Spring  2014" }.map { entry ->
                 val questions = entry.extraQs.run {
-                    if (entry.scores.size == 100 && equals("I rate the overall quality of the course as"))
-                        null
+                    if (entry.scores.size == 100 && equals("I rate the overall quality of the course as")) null
                     else if (entry.scores.size == 100 + 10 * (size - 1)) {
                         // note that empty questions seem to always be at the end
                         val mappedQs = TenQs.plus(drop(1).filter { it != "" }).map { QsMap.getOrElse(it) { it } }
@@ -237,118 +233,110 @@ fun getOldEntriesFromLocal(): Map<String, Map<String, List<Entry>>> {
     }
 }
 
-fun List<Entry>.encodeEntriesToJSON(): String =
-    Json.encodeToString(this)
+fun List<Entry>.encodeEntriesToJSON(): String = Json.encodeToString(this)
 
 //To get CSV, pass ::csvFromEntries, to get JSONs, pass ::General.encodeEntriesToJSON
 fun parseDeptsFromSIRS(
-    repository: Repository,
+    entriesRepository: EntriesRepository,
     schoolDeptsMap: Map<String, School>,
     stringForFile: (List<Entry>) -> String?,
     writeDir: String,
     extraEntries: Map<String, Map<String, List<Entry>>> = emptyMap(),
 ) {
-    schoolDeptsMap.forEach { (school, value) ->
-        value.depts.forEach dept@{ dept ->
-            //Wanted to have "launch" here for async but that breaks Rutgers servers
-            val entries = runBlocking { getDeptEntriesFromSIRS(repository, school, dept) }.ifEmpty { return@dept }
-                .plus(extraEntries[school]?.get(dept).orEmpty())
-            globalSetOfQs.addAll(entries.map { it.questions ?: emptyList() }.flatten())
+    val entriesMap = runBlocking { entriesRepository.getAllEntries(schoolDeptsMap.values) }
+    entriesMap.forEach { (school, deptsMap) ->
+        deptsMap.forEach dept@{ (dept, entries) ->
+            val allEntries = entries.plus(extraEntries[school]?.get(dept).orEmpty()).ifEmpty { return@dept }
+            globalSetOfQs.addAll(allEntries.flatMap { it.questions ?: emptyList() })
             println("banana $globalSetOfQs")
 
-            stringForFile(entries)?.let {
-                val file = makeFileAndDir("$writeDir/$school/$dept.txt")
+            stringForFile(allEntries)?.let {
+                val file = makeFileAndDir("$writeDir/$school/$dept.json")
                 file.writeText(it)
             }
         }
     }
+
+//    schoolDeptsMap.forEach { (school, value) ->
+//        value.depts.forEach dept@{ dept ->
+//            // Wanted to have "launch" here for async but that breaks Rutgers servers
+//            val entries = runBlocking { getDeptEntriesFromSIRS(repository, school, dept) }.ifEmpty { return@dept }
+//                .plus(extraEntries[school]?.get(dept).orEmpty())
+//            globalSetOfQs.addAll(entries.map { it.questions ?: emptyList() }.flatten())
+//            println("banana $globalSetOfQs")
+//
+//            stringForFile(entries)?.let {
+//                val file = makeFileAndDir("$writeDir/$school/$dept.txt")
+//                file.writeText(it)
+//            }
+//        }
+//    }
 }
 
 fun parseEntriesFromSIRS(
-    repository: Repository,
+    repository: SIRSApi,
     schoolDeptsMap: Map<String, School>,
     stringForFile: List<Entry>.() -> String?,
     writeDir: String,
     extraEntries: Map<String, Map<String, List<Entry>>> = emptyMap(), // for old entries no longer in SIRS
 ) {
-    schoolDeptsMap
-        .forEach { (school, value) ->
-            // ensures depts only present in extraEntries are preserved
-            val extra = extraEntries[school]?.keys ?: emptyList()
-            (value.depts + extra).map { dept ->
-                //Wanted to have "launch" here for async but that breaks Rutgers servers
-                val entries = runBlocking { getDeptEntriesFromSIRS(repository, school, dept) }
-                    .plus(extraEntries[school]?.get(dept).orEmpty())
-                    .ifEmpty { return@map null }
+    schoolDeptsMap.forEach { (school, value) ->
+        // ensures depts only present in extraEntries are preserved
+        val extra = extraEntries[school]?.keys ?: emptyList()
+        (value.depts + extra).map { dept ->
+            //Wanted to have "launch" here for async but that breaks Rutgers servers
+            val entries = runBlocking {
+                getDeptEntriesFromSIRS(
+                    repository,
+                    school,
+                    dept
+                )
+            }.plus(extraEntries[school]?.get(dept).orEmpty()).ifEmpty { return@map null }
 
-                dept to entries
-            }.filterNotNull()
-                // a few depts have ";" at end for some reason
-                .groupBy({ it.first.substringBefore(";") }, { it.second })
-                .mapValues { it.value.flatten() }
-                .forEach { (dept, entries) ->
-                    globalSetOfQs.addAll(entries.map { it.questions ?: emptyList() }.flatten())
-                    stringForFile(entries)?.let {
-                        val file = makeFileAndDir("$writeDir/$school/$dept.json")
-                        file.writeText(it)
-                    }
+            dept to entries
+        }.filterNotNull()
+            // a few depts have ";" at end for some reason
+            .groupBy({ it.first.substringBefore(";") }, { it.second }).mapValues { it.value.flatten() }
+            .forEach { (dept, entries) ->
+                globalSetOfQs.addAll(entries.map { it.questions ?: emptyList() }.flatten())
+                stringForFile(entries)?.let {
+                    val file = makeFileAndDir("$writeDir/$school/$dept.json")
+                    file.writeText(it)
                 }
-        }
-}
-
-fun parseDeptsToCSVsFromEntriesMap(
-    writeDir: String = "res/json-inverse",
-    entriesMap: Map<String, Map<String, List<Entry>>> = GetEntriesMap.fromLocalFile(),
-) {
-    entriesMap.forEach { (k, v) ->
-        v.forEach {
-            val file = makeFileAndDir("$writeDir/$k/${it.key}.txt")
-            csvFromEntries(it.value)?.let { s -> file.writeText(s) }
-        }
+            }
     }
 }
 
 suspend fun getDeptEntriesFromSIRS(
-    repository: Repository,
+    repository: SIRSApi,
     school: String,
     dept: String,
-    semesters: List<Int> = (4028..4044).toList(),
+    semesters: List<SemYear> = DefaultParams.sirsRange,
 ): List<Entry> {
-    return semesters.pmap { i ->
-        repository.getByDeptOrCourse(if (i % 2 == 0) "Spring" else "Fall", i / 2, school, dept)
-            .split("\t\t<strong>  ").drop(1)
-            .map(::Entry)
+    return semesters.pmap {
+        repository.getEntriesByDeptOrCourse(it, school, dept)
 //                .filter { it.scores.size==100 }
     }.flatten()
 }
 
 fun getInstructors(
-    repository: Repository,
-    year: String = "2022",
-    term: String = "9",
-    campuses: List<String> = listOf("NB", "CM", "NK"),
-    writeDir: String? = null,
+    repository: SOCApi = SOCApi(),
+    semYear: SemYear = DefaultParams.semYear,
+    campuses: List<Campus> = Campus.values().toList(),
+    writeDir: String? = null, // if null, don't write to file
 ): Map<String, List<String>> {
-    val instructorsByCourse = runBlocking {
-        campuses.map { campus ->
-            val res = repository.getCourses(year, term, campus)
-            Json.decodeFromString<List<Course>>(res)
-        }.flatten()
-            .distinct()
-            .groupBy(Course::courseString) { course ->
-                course.sections
-                    .flatMap { section ->
-                        section.instructors.map { it.name }
-                    }.distinct()
-            }.mapValues { it.value.flatten().sorted() }
-
+    return runBlocking {
+        campuses.flatMap { repository.getCourses(semYear, it) }.groupBy(Course::courseString) { courseListing ->
+            courseListing.sections.flatMap { section ->
+                section.instructors.map { it.name }
+            }
+        }.mapValues { it.value.flatten().sorted() }.filterValues { it.isNotEmpty() } // yes filtering is needed
+    }.also { instructorsMap ->
+        writeDir?.let {
+            val file = makeFileAndDir("$it.json")
+            file.writeText(Json.encodeToString(instructorsMap))
+        }
+        println("Amount of courses with at least one known prof: ${instructorsMap.size}")
+        println("Amount w/at least 2 profs: ${instructorsMap.count { it.value.size > 2 }}")
     }
-    writeDir?.let {
-        val file = makeFileAndDir("$writeDir.json")
-        file.writeText(Json.encodeToString(instructorsByCourse.filterValues { it.isNotEmpty() }))
-    }
-    println(instructorsByCourse.size)
-    println(instructorsByCourse.filterValues { it.isNotEmpty() }.size)
-    println(instructorsByCourse.filterValues { it.size > 2 }.size)
-    return instructorsByCourse
 }

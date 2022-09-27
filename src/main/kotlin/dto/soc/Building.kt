@@ -8,5 +8,5 @@ data class Building(
     val campus: String,
     val code: String,
     val id: String,
-    val name: String
+    val name: String,
 )

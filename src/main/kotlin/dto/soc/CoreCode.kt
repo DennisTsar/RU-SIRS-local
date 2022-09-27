@@ -9,5 +9,5 @@ data class CoreCode(
     val code: String,
     val description: String,
     val id: Int,
-    val label: String
+    val label: String,
 )

@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class Major(
     val code: String,
     val isMajorCode: Boolean,
-    val isUnitCode: Boolean
+    val isUnitCode: Boolean,
 )

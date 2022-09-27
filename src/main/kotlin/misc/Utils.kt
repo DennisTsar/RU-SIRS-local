@@ -16,6 +16,10 @@ suspend fun <A, B> Iterable<A>.pmap(f: suspend (A) -> B): List<B> = coroutineSco
     map { async { f(it) } }.awaitAll()
 }
 
+suspend fun <A, B, C> Map<A,B>.pmap(f: suspend (Map.Entry<A,B>) -> C): List<C> = coroutineScope {
+    map { async { f(it) } }.awaitAll()
+}
+
 fun File.walkDirectory(): Sequence<File> = walk().drop(1)
 
 fun makeFileAndDir(filename: String): File = File(filename).apply { parentFile.mkdirs() }

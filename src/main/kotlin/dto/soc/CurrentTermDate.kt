@@ -8,5 +8,5 @@ data class CurrentTermDate(
     val campus: String,
     val date: String,
     val term: Int,
-    val year: Int
+    val year: Int,
 )

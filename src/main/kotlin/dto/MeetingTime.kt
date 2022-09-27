@@ -17,5 +17,5 @@ data class MeetingTime(
     val pmCode: String,
     val roomNumber: String,
     val startTime: String,
-    val startTimeMilitary: String
+    val startTimeMilitary: String,
 )

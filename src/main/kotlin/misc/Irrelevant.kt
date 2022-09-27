@@ -1,10 +1,10 @@
 package misc
 
+import api.LocalApi
 import general.Entry
-import logic.GetEntriesMap
 
 fun validateMapOfEntries(
-    map1: Map<String, Map<String, List<Entry>>> = GetEntriesMap.fromLocalFile(),
+    map1: Map<String, Map<String, List<Entry>>> = LocalApi().getAllEntriesInDir(),
     map2: Map<String, Map<String, List<Entry>>>,
 ) {
     map1.forEach { (k, v) ->

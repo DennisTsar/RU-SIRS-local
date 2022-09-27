@@ -1,4 +1,4 @@
-package general
+package old_data
 
 import kotlinx.serialization.Serializable
 import misc.substringAfterBefore
@@ -14,7 +14,6 @@ class EntryOld2(
     val enrolled: Int,
     val responses: Int,
     val scores: List<Double>,
-    val extraQs: List<String>,
 ) {
     constructor(s: String) : this(
         instructor = s.substringBefore("  "),
@@ -33,15 +32,15 @@ class EntryOld2(
         scores = s.split("<td  class=\"mono").drop(1)
             .map {
                 it.substringAfterBefore(">", "<").toDouble()
-            },//indices 0-99 are all the numbers for one entry, row by row
-        extraQs = s.split("<td  class='qText' >").drop(10).map {
-            it.substringAfterBefore(". ", "</td>")
-        }
+            }//indices 0-99 are all the numbers for one entry, row by row
     )
 //    val shortTerm = term.first()+term.takeLast(2)
 
     override fun toString(): String {
-        return "$instructor, $term, $code, $courseName, $indexNum, $note, $enrolled, $responses, size:${scores.size}, $extraQs"
-//        return "General.Entry(\"$instructor\",\"$term\",\"$code\",\"$courseName\",\"$indexNum\",$enrolled,$responses,listOf(${scores.joinToString(",")}))"
+        return "General.Entry(\"$instructor\",\"$term\",\"$code\",\"$courseName\",\"$indexNum\",$enrolled,$responses,listOf(${
+            scores.joinToString(
+                ","
+            )
+        }))"
     }
 }

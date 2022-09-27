@@ -11,5 +11,5 @@ data class CrossListedSections(
     val registrationIndex: String,
     val sectionNumber: String,
     val subjectCode: String,
-    val supplementCode: String
+    val supplementCode: String,
 )
