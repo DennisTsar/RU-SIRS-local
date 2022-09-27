@@ -8,8 +8,6 @@ import dto.Course
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import logic.mapByProfs
-import logic.mapByProfs2
 import misc.makeFileAndDir
 import misc.pmap
 import old_data.EntryOld3
@@ -32,40 +30,24 @@ fun main() {
 
 //    completeOverwrite()
 
-    val schoolsMapRepository = LocalApi()
+    val repo = LocalApi()
 
-    val depts = runBlocking { LocalApi().getSchoolsMap()["01"]!! }.depts
-
-    for(i in depts){
-        val entries = runBlocking { schoolsMapRepository.getEntries("01", i) }
-
-        val a = entries.mapByProfs()
-        val b = entries.mapByProfs2()
-
-        a.forEach { (k, v) ->
-            val s = b[k] ?: run { println("no2: $k $i"); return@forEach }
-            if(s != v)
-                println("no $k $i")
-        }
-    }
+    //region testing name issues
+//    val depts = runBlocking { LocalApi().getSchoolsMap()["01"]!! }.depts
 //
-//    val q = entries.mapByProfs()
-//        .filterValues(List<Entry>::isNotEmpty)
-//        .mapValues { (_, entries) ->
-//            entries.filter { it.scores.size >= 100 } // needed for zip to work & good for clean data anyway
-//                .map { entry ->
-//                    // group by question (there are 10 nums in table per question)
-//                    // + we only care about first 5 nums per Q (the actual ratings) which are all int amounts
-//                    entry.scores.chunked(10)
-//                        .map { it.subList(0, 5).map(Double::toInt) }
-//                }.reduce { accByQuestion, responsesByQ ->
-//                    // nums from each entry get zipped with each other, by question
-//                    accByQuestion.zip(responsesByQ) { accRatings, ratings ->
-//                        accRatings.zip(ratings, Int::plus)
-//                    }
-//                }
-//        }.forEach(::println)
-
+//    for(i in depts){
+//        val entries = runBlocking { repo.getEntries("01", i) }
+//
+//        val a = entries.mapByProfs()
+//        val b = entries.mapByProfs2()
+//
+//        a.forEach { (k, v) ->
+//            val s = b[k] ?: run { println("no2: $k $i"); return@forEach }
+//            if(s != v)
+//                println("no $k $i")
+//        }
+//    }
+    //endregion
 
 //    getInstructors(SOCApi(), writeDir = "extra-json-data/F22-instructors2")
 
