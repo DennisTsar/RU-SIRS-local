@@ -32,18 +32,18 @@ fun Ratings.getRatingStats(): List<Pair<Double, Int>> {
     }
 }
 
-fun csvFromEntries(entries: List<Entry>): String? {
-    val profRatings = entries.mapByProfs()
-        .filterValues(List<Entry>::isNotEmpty)
+fun List<Entry>.toCsv(): String? {
+    val profRatings = mapByProfs()
+        .filterValues { it.isNotEmpty() }
         .mapValues { (_, entries) ->
             entries.getTotalRatings().getRatingStats()[8] // This is the teaching effectiveness question
-        }.toList().takeIf { it.isNotEmpty() } ?: return null // turning into list so it can be sorted
+        }.toList() // turning into list so it can be sorted
+        .takeIf { it.isNotEmpty() } ?: return null // Not sure if this is needed
 
     val deptAve = profRatings.map { it.second.first }.average().roundToDecimal(2)
     val totalNum = profRatings.sumOf { it.second.second }
 
     val csv = (profRatings + Pair("Average", deptAve to totalNum))
-        .toList()
         .sortedBy { -it.second.first }
         .joinToString("\n") { (name, stats) -> "$name;${stats.first};${stats.second}" }
     return "Professor;Rating;Total Responses\n$csv"
@@ -70,7 +70,7 @@ fun List<Entry>.mapByProfs(): Map<String, List<Entry>> {
     // This exists so that "Smith" and "Smith, John" are grouped together IFF John is the only Smith in the department
     // note that this 100% combines "Smith, James" and "Smith, John" but the SIRS data is also sketchy about that
     val adjustedNames = filtered
-        .map(Entry::formatName)
+        .map { it.formatName() }
         .distinct()
         .groupBy { it.substringBefore(",") }
         .filterValues { it.size == 2 } // One for "Smith" and one for "Smith, J"
@@ -90,7 +90,7 @@ fun List<Entry>.mapByProfs2(): Map<String, List<Entry>> {
     // This exists so that "Smith" and "Smith, John" are grouped together IFF John is the only Smith in the department
     // note that this 100% combines "Smith, James" and "Smith, John" but the SIRS data is also sketchy about that
     val adjustedNames = filtered
-        .map(Entry::formatName)
+        .map { it.formatName() }
 //        .distinct()
         .groupBy { it.substringBefore(",") }
 //        .filterValues { it.size == 2 } // One for "Smith" and one for "Smith, J"

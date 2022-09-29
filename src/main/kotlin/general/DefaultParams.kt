@@ -11,8 +11,8 @@ object DefaultParams {
         semYear.semester.other(), semYear.year - semYear.semester.other().ordinal
     )
     private val firstSemYear = SemYear(Semester.Fall, 2014)
-    val sirsRange = (firstSemYear.year..prevSemester.year).flatMap {
-        listOf(SemYear(Semester.Spring, it), SemYear(Semester.Fall, it))
+    val sirsRange = (firstSemYear.year..prevSemester.year).flatMap { year ->
+        Semester.values().map { sem -> SemYear(sem, year) }
     }.drop(firstSemYear.semester.ordinal).dropLast(prevSemester.semester.other().ordinal)
 }
 
