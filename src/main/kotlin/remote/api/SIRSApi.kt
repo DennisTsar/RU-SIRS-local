@@ -1,8 +1,9 @@
-package api
+package remote.api
 
-import api.interfaces.Api
-import api.interfaces.SchoolsMapRepository
-import dto.sirs_courseFilter.SIRSCourseFilterResult
+import remote.interfaces.Api
+import remote.interfaces.EntriesRepository
+import remote.interfaces.SchoolsMapRepository
+import remote.dto.sirs_courseFilter.SIRSCourseFilterResult
 import general.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
@@ -15,7 +16,7 @@ import kotlinx.serialization.json.Json
 import misc.pmap
 import misc.substringAfterBefore
 
-class SIRSApi(private val API_KEY: String) : Api, SchoolsMapRepository {
+class SIRSApi(private val API_KEY: String) : Api, SchoolsMapRepository, EntriesRepository {
     private val sirsClient = client.config {
         defaultRequest {
             header("Cookie", API_KEY)
@@ -68,7 +69,10 @@ class SIRSApi(private val API_KEY: String) : Api, SchoolsMapRepository {
         }.mapSIRSPageToEntries()
     }
 
-    suspend fun getSchoolsOrDepts(semYear: SemYear = DefaultParams.prevSemester, school: String = ""): SIRSCourseFilterResult {
+    suspend fun getSchoolsOrDepts(
+        semYear: SemYear = DefaultParams.prevSemester,
+        school: String = "",
+    ): SIRSCourseFilterResult {
         return sirsClient.config {
             install(ContentNegotiation) {
                 serialization(ContentType.Text.Html, Json)
@@ -117,5 +121,28 @@ class SIRSApi(private val API_KEY: String) : Api, SchoolsMapRepository {
             }.associateBy { it.code }
     }
 
+    suspend fun getCompleteSchoolsMap(semesters: List<SemYear> = DefaultParams.sirsRange): Map<String, School> {
+        return semesters
+            .pmap { getSpecificSchoolsMap(it) }
+            .reduce { acc, map ->
+                val newSchools = map.filterKeys { it !in acc.keys }
+                acc.mapValues { (code, school) ->
+                    val otherSchool = map[code] ?: return@mapValues school
+                    school.copy(depts = (school.depts + otherSchool.depts).sorted().toSet())
+                } + newSchools
+            }
+    }
+
+    suspend fun getEntriesOverSems(
+        school: String,
+        dept: String,
+        semesters: List<SemYear> = DefaultParams.sirsRange,
+    ): List<Entry> {
+        return semesters.pmap { getEntriesByDeptOrCourse(it, school, dept) }.flatten()
+    }
+
     override suspend fun getSchoolsMap(): Map<String, School> = getSchoolsMapUsingSOC()
+
+    override suspend fun getLatestEntriesInDept(school: String, dept: String): List<Entry> =
+        getEntriesOverSems(school, dept)
 }

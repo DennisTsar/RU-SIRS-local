@@ -1,9 +1,8 @@
-package dto
+package remote.dto
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class DescriptionHolder(
+data class Code(
     val code: String,
-    val description: String,
 )

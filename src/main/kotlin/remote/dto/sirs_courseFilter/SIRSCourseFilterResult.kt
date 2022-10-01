@@ -1,4 +1,4 @@
-package dto.sirs_courseFilter
+package remote.dto.sirs_courseFilter
 
 import kotlinx.serialization.Serializable
 

@@ -1,8 +1,8 @@
-package api
+package remote.api
 
-import api.interfaces.Api
-import api.interfaces.EntriesRepository
-import api.interfaces.SchoolsMapRepository
+import remote.interfaces.Api
+import remote.interfaces.EntriesFromFileRepository
+import remote.interfaces.SchoolsMapRepository
 import general.Entry
 import general.School
 import io.ktor.client.call.*
@@ -13,7 +13,7 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.*
 import kotlinx.serialization.json.Json
 
-class GithubApi : Api, EntriesRepository, SchoolsMapRepository {
+class GithubApi : Api, EntriesFromFileRepository, SchoolsMapRepository {
     private val ghClient = client.config {
         install(ContentNegotiation) {
             serialization(ContentType.Text.Plain, Json)
@@ -27,7 +27,7 @@ class GithubApi : Api, EntriesRepository, SchoolsMapRepository {
         }
     }
 
-    override suspend fun getEntries(school: String, dept: String, folderNum: Int): List<Entry> =
+    override suspend fun getEntriesFromDir(school: String, dept: String, folderNum: Int): List<Entry> =
         ghClient.get("json-data-$folderNum/$school/$dept.json").body()
 
     override suspend fun getSchoolsMap(): Map<String, School> =

@@ -1,4 +1,4 @@
-package api.interfaces
+package remote.interfaces
 
 import general.School
 

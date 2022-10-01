@@ -1,7 +1,7 @@
-package api
+package remote.api
 
-import api.interfaces.EntriesRepository
-import api.interfaces.SchoolsMapRepository
+import remote.interfaces.EntriesFromFileRepository
+import remote.interfaces.SchoolsMapRepository
 import general.Entry
 import general.School
 import kotlinx.serialization.decodeFromString
@@ -10,10 +10,10 @@ import misc.walkDirectory
 import java.io.File
 
 class LocalApi(
-    val mainJsonDir: String = "json-data-7/",
+    val mainJsonDir: String = "json-data-9/",
     private val extraJsonDir: String = "extra-json-data",
-) : EntriesRepository, SchoolsMapRepository {
-    override suspend fun getEntries(school: String, dept: String, folderNum: Int): List<Entry> =
+) : EntriesFromFileRepository, SchoolsMapRepository {
+    override suspend fun getEntriesFromDir(school: String, dept: String, folderNum: Int): List<Entry> =
         Json.decodeFromString(File("json-data-$folderNum/$school/$dept.json").readText())
 
     inline fun <reified T> getAllEntriesInDir(readDir: String = mainJsonDir): Map<String, Map<String, List<T>>> {

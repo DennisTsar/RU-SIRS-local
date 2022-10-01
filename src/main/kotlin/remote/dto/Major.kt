@@ -1,4 +1,4 @@
-package dto
+package remote.dto
 
 import kotlinx.serialization.Serializable
 

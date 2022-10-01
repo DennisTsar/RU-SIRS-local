@@ -1,8 +1,8 @@
-package api
+package remote.api
 
-import api.interfaces.Api
-import dto.Course
-import dto.soc.SOCData
+import remote.interfaces.Api
+import remote.dto.Course
+import remote.dto.soc.SOCData
 import general.Campus
 import general.DefaultParams
 import general.SemYear

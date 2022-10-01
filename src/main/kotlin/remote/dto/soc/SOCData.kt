@@ -1,7 +1,7 @@
-package dto.soc
+package remote.dto.soc
 
 
-import dto.DescriptionHolder
+import remote.dto.DescriptionHolder
 import kotlinx.serialization.Serializable
 
 @Serializable

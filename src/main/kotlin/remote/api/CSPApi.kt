@@ -1,6 +1,6 @@
-package api
+package remote.api
 
-import api.interfaces.Api
+import remote.interfaces.Api
 import general.Campus
 import general.LevelOfStudy
 import general.Semester

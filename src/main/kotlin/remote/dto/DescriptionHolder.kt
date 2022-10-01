@@ -1,13 +1,9 @@
-package dto.soc
-
+package remote.dto
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Unit(
-    val campus: String,
+data class DescriptionHolder(
     val code: String,
     val description: String,
-    val homeCampus: String,
-    val level: String,
 )
