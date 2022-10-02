@@ -65,7 +65,7 @@ fun List<Entry>.mapByProfs(): Map<String, List<Entry>> {
     val filtered = filterNot { entry ->
         listOf("Do not use", "ERROR").any { it in entry.instructor }
                 || listOf("", "TA").any { it == entry.instructor }
-                || entry.scores.size < 100 // controversial line - do I want it here?
+//                || entry.scores.size < 100 // controversial line - do I want it here?
     }
     // This exists so that "Smith" and "Smith, John" are grouped together IFF John is the only Smith in the department
     // note that this 100% combines "Smith, James" and "Smith, John" but the SIRS data is also sketchy about that
@@ -82,7 +82,7 @@ fun List<Entry>.mapByProfs(): Map<String, List<Entry>> {
     }
 }
 
-fun List<Entry>.mapByProfs2(): Map<String, List<Entry>> {
+fun List<Entry>.mapByProfs3(): Map<String, List<Entry>> {
     val filtered = filterNot { entry ->
         listOf("Do not use", "ERROR").any { it in entry.instructor }
                 || listOf("", "TA").any { it == entry.instructor }
@@ -90,14 +90,75 @@ fun List<Entry>.mapByProfs2(): Map<String, List<Entry>> {
     // This exists so that "Smith" and "Smith, John" are grouped together IFF John is the only Smith in the department
     // note that this 100% combines "Smith, James" and "Smith, John" but the SIRS data is also sketchy about that
     val adjustedNames = filtered
-        .map { it.formatName() }
-//        .distinct()
+        .map { it.formatFullName() }
+        .distinct()
         .groupBy { it.substringBefore(",") }
-//        .filterValues { it.size == 2 } // One for "Smith" and one for "Smith, J"
-        .mapValues { (_, names) ->
-            names.find { "," in it } ?: names[0]// should be guaranteed to exist
-        }
+        .flatMap { (k, v) ->
+            if (v.any { "," !in it } && v.size == 2)
+                return@flatMap listOf(k to v.maxByOrNull { it.length }!!)
+
+            v.filter { "," in it }
+                .groupBy { it.substring(0, it.indexOf(",") + 3) }
+                .flatMap { (k2, v2) ->
+                    if (v2.size == 2)
+                        listOf(k2 to v2.maxByOrNull { it.length }!!)
+                    else
+                        emptyList()
+                }.run {
+                    if (size == 1)
+                        plus(k to first().second)
+                    else this
+                }
+        }.toMap()
     return filtered.groupBy { entry ->
-        entry.formatName().let { adjustedNames.getOrDefault(it, it) }
+        entry.formatFullName().let { adjustedNames.getOrDefault(it, it) }
     }
+}
+
+fun List<Entry>.mapByProfs4(): Map<String, List<Entry>> {
+    val filtered = filterNot { entry ->
+        listOf("Do not use", "ERROR").any { it in entry.instructor }
+                || listOf("", "TA").any { it == entry.instructor }
+    }
+    // This exists so that "Smith" and "Smith, John" are grouped together IFF John is the only Smith in the department
+    // note that this 100% combines "Smith, James" and "Smith, John" but the SIRS data is also sketchy about that
+    val adjustedNames = filtered
+        .map { it.formatFullName() }
+        .distinct()
+        .groupBy { it.substringBefore(",") }
+        .flatMap { (k, v) ->
+            if (v.any { "," !in it } && v.size == 2)
+                return@flatMap listOf(k to v.maxByOrNull { it.length }!!)
+
+            v.filter { "," in it }
+                .groupBy { it.substring(0, it.indexOf(",") + 3) }
+                .flatMap inner@{ (k2, v2) ->
+                    if (v2.size == 2)
+                        return@inner listOf(k2 to v2.maxByOrNull { it.length }!!)
+
+                    if(v2.size > 2) {
+                        val allNames = v2.sortedBy { it.length }.drop(1)
+
+                        if(allNames.count { !it.startsWith(allNames[0]) } == 0)
+                            return@inner v2.map { it to allNames.last() }
+                    }
+                    emptyList()
+                }.run {
+                    if (size == 1)
+                        plus(k to first().second)
+                    else this
+                }
+        }.toMap()
+    return filtered.groupBy { entry ->
+        entry.formatFullName().let { adjustedNames.getOrDefault(it, it) }
+    }
+}
+
+private fun Entry.formatFullName(): String {
+    return instructor
+        .replace(" \\(.*\\)|,|\\.".toRegex(), "") // removes stuff in parentheses & removes commas
+        .split(" ")
+        .let { parts ->
+            parts[0] + (parts.getOrNull(1)?.let { ", $it" } ?: "") // Adds first initial if present
+        }.uppercase()
 }
