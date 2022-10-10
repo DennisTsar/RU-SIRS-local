@@ -1,13 +1,15 @@
 package general
 
-import remote.api.SIRSApi
-import remote.api.SOCApi
-import remote.interfaces.EntriesRepository
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import misc.makeFileAndDir
 import misc.pmap
+import misc.similarity
+import remote.api.LocalApi
+import remote.api.SIRSApi
+import remote.api.SOCApi
+import remote.interfaces.EntriesRepository
 
 val globalSetOfQs = mutableSetOf<String>()
 
@@ -32,22 +34,8 @@ fun main() {
 //    )
     //endregion
 
-    //region testing name issues
-//    val depts = runBlocking { LocalApi().getSchoolsMap()["01"]!! }.depts
-//
-//    for(i in depts){
-//        val entries = runBlocking { repo.getEntries("01", i) }
-//
-//        val a = entries.mapByProfs()
-//        val b = entries.mapByProfs2()
-//
-//        a.forEach { (k, v) ->
-//            val s = b[k] ?: run { println("no2: $k $i"); return@forEach }
-//            if(s != v)
-//                println("no $k $i")
-//        }
-//    }
-    //endregion
+    val entriesMap = LocalApi().getAllEntriesInDir<Entry>("json-data-9")
+    entriesMap.toEntriesByProfMap().printPossibleNameAdjustments()
 
 //    runBlocking {
 //        val socRes = repository.getSOCData()
@@ -69,8 +57,7 @@ fun parseDeptsFromSIRS(
     writeDir: String,
     extraEntries: EntriesMap = emptyMap(),
 ) {
-    runBlocking { entriesRepository.getAllLatestEntries(schoolDeptsMap.values) }
-        .addOldEntries(extraEntries)
+    runBlocking { entriesRepository.getAllLatestEntries(schoolDeptsMap.values) }.addOldEntries(extraEntries)
         .forEach { (school, deptsMap) ->
             deptsMap.forEach dept@{ (dept, entries) ->
                 globalSetOfQs.addAll(entries.flatMap { it.questions ?: emptyList() })
@@ -114,14 +101,10 @@ fun parseEntriesFromSIRS(
             //Wanted to have "launch" here for async but that breaks Rutgers servers
             val entries = runBlocking {
                 semesters.pmap { repository.getEntriesByDeptOrCourse(it, school, dept) }
-            }.flatten()
-                .plus(extraEntries[school]?.get(dept).orEmpty())
-                .ifEmpty { return@map null }
+            }.flatten().plus(extraEntries[school]?.get(dept).orEmpty()).ifEmpty { return@map null }
 
             dept to entries
-        }.filterNotNull()
-            .groupBy({ it.first }, { it.second })
-            .mapValues { it.value.flatten() }
+        }.filterNotNull().groupBy({ it.first }, { it.second }).mapValues { it.value.flatten() }
             .forEach { (dept, entries) ->
                 globalSetOfQs.addAll(entries.map { it.questions ?: emptyList() }.flatten())
                 stringForFile(entries)?.let {
@@ -139,17 +122,12 @@ fun getInstructors(
     writeDir: String? = null, // if null, don't write to file
 ): Map<String, List<String>> {
     return runBlocking {
-        campuses
-            .flatMap { repository.getCourses(semYear, it) }
-            .groupBy(
-                keySelector = { it.courseString },
-                valueTransform = { courseListing ->
-                    courseListing.sections.flatMap { section ->
-                        section.instructors.map { it.name }
-                    }
+        campuses.flatMap { repository.getCourses(semYear, it) }
+            .groupBy(keySelector = { it.courseString }, valueTransform = { courseListing ->
+                courseListing.sections.flatMap { section ->
+                    section.instructors.map { it.name }
                 }
-            ).mapValues { it.value.flatten().sorted() }
-            .filterValues { it.isNotEmpty() } // yes filtering is needed
+            }).mapValues { it.value.flatten().sorted() }.filterValues { it.isNotEmpty() } // yes filtering is needed
     }.also { instructorsMap ->
         writeDir?.let {
             val file = makeFileAndDir("$it.json")
@@ -157,5 +135,42 @@ fun getInstructors(
         }
         println("Amount of courses with at least one known prof: ${instructorsMap.size}")
         println("Amount w/at least 2 profs: ${instructorsMap.count { it.value.size > 2 }}")
+    }
+}
+
+fun EntriesByProfMap.printPossibleNameAdjustments(printURL: Boolean = true) {
+    forEachDept { school, dept, profMap ->
+        val names = profMap.keys.sorted()
+        val pairs = names.mapIndexed { index, s ->
+            if (s.substringBefore(",").length==1)
+                println("swapped? ($school-$dept): $s")
+            names.drop(index + 1).map { Pair(s, it) }
+        }.flatten()
+
+        pairs.filter { (first, second) ->
+            val a = first.split(" ", ",").filter { it.isNotBlank() }
+            val b = second.split(" ", ",").filter { it.isNotBlank() }
+            similarity(a[0], b[0]) > .75
+                    || (similarity(a[0], b[0]) > .33 && similarity(a.getOrNull(1), b.getOrNull(1)) > .75)
+                    // checks for flipped first/last names
+                    || (similarity(a[0], b.getOrNull(1)) > .75 && similarity(a.getOrNull(1), b[0]) > .75)
+        }.ifEmpty { null }?.let { filtered ->
+            println("\n\"$school:$dept\" -> when (prof) {")
+            filtered.sortedBy { it.second }.forEach { (a, b) ->
+                print("\t\"$b\" -> \"$a\"")
+                val common = b.zip(a).takeWhile { (x, y) -> x == y }
+                    .map { it.first }.joinToString("").split(",")[0]
+                    .ifBlank { // go based on first names if last names different
+                        b.substringAfter(", ").zip(a.substringAfter(", "))
+                            .takeWhile { (x, y) -> x == y }
+                            .map { it.first }.joinToString("")
+                    }
+                if(printURL)
+                    println(" https://sirs.ctaar.rutgers.edu/index.php?mode=name&survey%5Blastname%5D=$common" +
+                            "&survey%5Bsemester%5D=&survey%5Byear%5D=&survey%5Bschool%5D=&survey%5Bdept%5D=$dept)")
+                else println()
+            }
+            println("\telse -> prof\n}")
+        }
     }
 }

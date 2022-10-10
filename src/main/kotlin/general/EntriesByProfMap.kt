@@ -1,21 +1,36 @@
 package general
 
-
-private typealias EntriesByProf = Map<String, List<Entry>>
+typealias EntriesByProf = Map<String, List<Entry>>
 typealias EntriesByProfMap = SchoolDeptsMap<EntriesByProf>
 
 fun EntriesMap.toEntriesByProfMap(): EntriesByProfMap =
-    mapEachDept { _, _, entries -> entries.mapByProfs() }
+    mapEachDept { _, _, entries ->
+        entries.filterNot { entry ->
+            val prof = entry.instructor
+            listOf("do not use", "error", "faculty", "proctortrack", "instructor").any { it in prof.lowercase() }
+                    || listOf("", ",", "--", "TA", "(Recitation)").any { it == prof }
+                    || prof.likelyMultipleProfs()
+        }.mapByProfs()
+    }
+
+private fun String.likelyMultipleProfs(): Boolean {
+    val listOfAccepted = setOf(
+        "der", "de", "da", "la", "ii", "iii", "iv", "uz", "el", "van",
+        "ed.d.", "ezzat", "dagracia", "desilva", "sai", "rui", "graca", "mai", "n", "fache"
+    )
+    val altered = replace(" \\(.*\\)|-".toRegex(), "") // replace content in parentheses & removes dashes
+        .replace("&quot;", "\"")
+        .lowercase()
+
+    val filtered = altered.split(" ", ",").filter { it.isNotBlank() } - listOfAccepted
+    return ";" in altered || filtered.size > 3
+}
 
 fun List<Entry>.mapByProfs(): EntriesByProf {
-    val filtered = filterNot { entry ->
-        listOf("Do not use", "ERROR").any { it in entry.instructor }
-                || listOf("", "TA").any { it == entry.instructor }
-    }
-    val adjustedNames = filtered.getNameAdjustments()
+    val adjustedNames = autoNameAdjustments()
 
-    return filtered.groupBy { entry ->
-        entry.formatFullName20().let { adjustedNames.getOrDefault(it, it) }
+    return groupBy { entry ->
+        entry.formatFullName().let { adjustedNames.getOrDefault(it, it) }
     }
 }
 
@@ -34,18 +49,23 @@ fun List<Entry>.mapByProfs(): EntriesByProf {
 // 3c-iii. If not, we just leave an empty list
 // 3c-iv. However, if there are no non-initial names, we map the initial name to itself - to not have an empty list
 // 3d. Because, if the resulting mappings exist, we also add the map of the lone last name to the mapped value
-// 3e. At this point, we also incorporate into the map the names with hyphens, preferring them if they exist
-// 4. Finally, we add a mapping of all hyphened names by their non-hyphened version, in case they weren't already added
+// 3e. At this point, we also incorporate into the map the names with special chars, preferring them if they exist
+// 4. Finally, we add a mapping of special char names by their non-special version, in case they weren't already added
 // If you made it this far, good luck. I hope this helps. :)
 // And if you figured out a simpler way to get the same results - please implement it!
-fun List<Entry>.getNameAdjustments(): Map<String, String> {
-    val names = filter { it.instructor.count { char -> char == ',' } <= 1 } // filter out multiple prof entries - for now
-        .map { it.formatFullName20() }
+fun List<Entry>.autoNameAdjustments(): Map<String, String> {
+    val names = map { it.formatFullName() }
 
-    val hasHyphen = names.filter { "-" in it }
-        .associateBy { it.replace("-","") }
+    val specialChars = listOf('-', '\'')
+    val removeSpecialChars: String.() -> String = {
+        specialChars.fold(this) { acc, char -> acc.filter { it != char } }
+    }
 
-    return names.map { it.replace("-","") }
+    val specialCharMap = names.filter { name -> specialChars.any { it in name } }
+        .associateBy { it.removeSpecialChars() }
+
+    val nameMappings = names
+        .map { it.removeSpecialChars() }
         .distinct()
         .groupBy(
             keySelector = { it.substringBefore(",") },
@@ -71,89 +91,35 @@ fun List<Entry>.getNameAdjustments(): Map<String, String> {
                     it.plus(lastName to it[0].second) // pair "Smith" with first name if only one exists
                 else it
             }.flatMap { (key, value) ->
-                val newSecond = hasHyphen[value] ?: value // use name with dashes if it exists
-                val hyphenPair = hasHyphen[key]?.let { it to newSecond } // pair name w/ dash same as name w/o dash
-                listOfNotNull(key to newSecond, hyphenPair)
+                val newSecond = specialCharMap[value] ?: value // use name with dashes if it exists
+                val specialPair = specialCharMap[key]?.let { it to newSecond } // duplicate normal pair for special name
+                listOfNotNull(key to newSecond, specialPair)
             }
-        }.toMap() + hasHyphen
+        }.toMap()
+    return specialCharMap + nameMappings // not that this order is important as keys from first are overwritten
 }
 
-fun Entry.formatFullName20(): String {
-    return instructor
+fun Entry.formatFullName(): String {
+    return manualNameAdjustment(instructor
+        .trim()
         .replace(" \\(.*\\)|,|\\.".toRegex(), "") // removes stuff in parentheses + removes commas & periods
         .split(" ")
-        .let { parts ->
+        .let { split ->
+            // un-separate the specials from other parts of the name
+            // first combine them forwards, then backwards
+            val forwards = setOf("der", "de", "da", "la", "uz", "el", "van")
+            val backwards = forwards + setOf("ii", "iii", "iv")
+            split.fold(emptyList<String>()) { acc, s ->
+                acc.lastOrNull()
+                    ?.takeIf { it.split(" ").last().lowercase() in forwards }
+                    ?.let { acc.dropLast(1) + "$it $s" } ?: (acc + s)
+            }.foldRight(emptyList<String>()) { s, acc ->
+                acc.firstOrNull()
+                    ?.takeIf { it.split(" ").first().lowercase() in backwards }
+                    ?.let { listOf("$s $it") + acc.drop(1) } ?: (listOf(s) + acc)
+            }
+        }.let { parts ->
             parts[0] + (parts.getOrNull(1)?.let { ", $it" } ?: "") // Adds first initial if present
-        }.uppercase()
-        .fixTypo(code)
-}
-
-private fun String.fixTypo(code: String): String {
-    return when (code.split(":").take(2).joinToString(":")) {
-        "01:014" -> when (this) {
-            "RAMACHANDRANA, ANITHA" -> "RAMACHANDRAN, ANITHA"
-            "WHITNEYIII, JAMES", "WHITNEY, JANES" -> "WHITNEY, JAMES"
-            "JACKSONBREWER, KARLA" -> "JACKSON-BREWER, KARLA"
-            "PRICE, MELANYE" -> "PRICE, MELANIE"
-            "CADENAJ, JESENIA" -> "CADENA, JESENIA"
-            else -> this
-        }
-        "01:050" -> when (this) {
-            "CHANMALIK, SYLVIA" -> "CHAN-MALIK, SYLVIA"
-            else -> this
-        }
-        "01:070" -> when (this) {
-            "GHASSEM-FACHAN, PARVIS" -> "GHASSEM-FACHANDI, PARVIS"
-            else -> this
-        }
-        "01:078" -> when (this) {
-            "VASILIAN, ASBED" -> "VASSILIAN, ASBED"
-            else -> this
-        }
-        "01:160" -> when (this) {
-            "SHANKAR, NIRMILA" -> "SHANKAR, NIRMALA"
-            "PRAMINIK, SANHITA" -> "PRAMANIK, SANHITA"
-            "RABEONY, MANSES" -> "RABEONY, MANESE"
-            "ROYCHOWDUHURY, LIPIKA", "ROYCHOWDURY, LIPIKA" -> "ROYCHOWDHURY, LIPIKA"
-            "MARVASTI, SATAREH" -> "MARVASTI, SETAREH"
-            "JIMINEZ, LESLIE" -> "JIMENEZ, LESLIE"
-            "SOUNDARAJAN, NACHIMUTHU" -> "SOUNDARARAJAN, NACHIMUTHU"
-            "KROGH-JESPERSE, KARSTEN" -> "KROGH-JESPERSEN, KARSTEN"
-            "YORK, DARREN" -> "YORK, DARRIN"
-            "MARCOTRIGIANO, JOSEPH" -> "MARCOTRIGIANO, JOESEPH"
-            "OLSON, WILIMA" -> "OLSON, WILMA"
-            "ROMSTED, LAWRENCE" -> "ROMSTED, LAURENCE"
-            else -> this
-        }
-        "01:355" -> when (this) {
-            "BASS, JQNATHAN" -> "BASS, JONATHAN"
-            "BORIEHOLTZ, DEBRA" -> "BORIEHOLTZ, DEBBIE"
-            "CHOWDHURY, NANDINCH" -> "CHOWDHURY, NANDINI"
-            "DUFFY, MIKE" -> "DUFFY, MICHAEL"
-            "FOLEM, SEAN" -> "FOLEY, SEAN"
-            "GILMARTIN, VGILMAR" -> "GILMARTIN, VIRGINIA"
-            "GOELLER, ANGIESZKA" -> "GOELLER, AGNIESZKA"
-            "HAMLET, BMENDA" -> "HAMLET, BRENDA"
-            else -> this
-        }
-        "01:750" -> when (this) {
-            "HARMON, S" -> "HARMAN, S" // this is a guess
-            "KIRYUKIN, VALERY" -> "KIRYUKHIN, VALERY"
-            "RASTOGI, T" -> "RASTOGI, A"
-            "DIACONSECU, E" -> "DIACONESCU, E"
-            else -> this
-        }
-        "14:332" -> when (this) {
-            "DANA, KRISTEN" -> "DANA, KRISTIN"
-            "SUBRAMANIAN, NAGI" -> "SUBRAMANIAN, NAGANATHAN" // guess
-            "SPASOJEVIC, PREDRAY" -> "SPASOJEVIC, PREDRAG"
-            "GAGGIANO, MICHAEL" -> "CAGGIANO, MICHAEL"
-            "KARIMINI, NAGHMEH" -> "KARIMI, NAHHMEH"
-            "JHA, SHANTANU" -> "JHA, SHANTENU"
-            "PARAKEVAKOS, IOANNIS" -> "PARASKEVAKOS, IOANNIS"
-            else -> this
-        }
-        else -> this
-    }
-
+        }.uppercase(), code
+    )
 }
