@@ -53,7 +53,7 @@ fun List<Entry>.mapByProfs(): EntriesByProf {
 // 4. Finally, we add a mapping of special char names by their non-special version, in case they weren't already added
 // If you made it this far, good luck. I hope this helps. :)
 // And if you figured out a simpler way to get the same results - please implement it!
-fun List<Entry>.autoNameAdjustments(): Map<String, String> {
+private fun List<Entry>.autoNameAdjustments(): Map<String, String> {
     val names = map { it.formatFullName() }
 
     val specialChars = listOf('-', '\'')
@@ -99,8 +99,8 @@ fun List<Entry>.autoNameAdjustments(): Map<String, String> {
     return specialCharMap + nameMappings // not that this order is important as keys from first are overwritten
 }
 
-fun Entry.formatFullName(): String {
-    return manualNameAdjustment(instructor
+private fun Entry.formatFullName(): String {
+    return instructor
         .trim()
         .replace(" \\(.*\\)|,|\\.".toRegex(), "") // removes stuff in parentheses + removes commas & periods
         .split(" ")
@@ -120,6 +120,6 @@ fun Entry.formatFullName(): String {
             }
         }.let { parts ->
             parts[0] + (parts.getOrNull(1)?.let { ", $it" } ?: "") // Adds first initial if present
-        }.uppercase(), code
-    )
+        }.uppercase()
+        .let { manualNameAdjustment(it, code) }
 }
