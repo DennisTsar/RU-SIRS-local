@@ -1,8 +1,5 @@
 package remote.api
 
-import remote.interfaces.Api
-import remote.dto.Course
-import remote.dto.soc.SOCData
 import general.Campus
 import general.DefaultParams
 import general.SemYear
@@ -14,6 +11,9 @@ import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import misc.substringAfterBefore
+import remote.dto.Course
+import remote.dto.soc.SOCData
+import remote.interfaces.Api
 
 private const val SOC_BASE_URL = "https://sis.rutgers.edu/soc"
 

@@ -1,8 +1,5 @@
 package remote.api
 
-import remote.interfaces.Api
-import remote.interfaces.EntriesFromFileRepository
-import remote.interfaces.SchoolsMapRepository
 import general.Entry
 import general.School
 import io.ktor.client.call.*
@@ -12,6 +9,9 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.*
 import kotlinx.serialization.json.Json
+import remote.interfaces.Api
+import remote.interfaces.EntriesFromFileRepository
+import remote.interfaces.SchoolsMapRepository
 
 class GithubApi : Api, EntriesFromFileRepository, SchoolsMapRepository {
     private val ghClient = client.config {

@@ -1,9 +1,5 @@
 package remote.api
 
-import remote.interfaces.Api
-import remote.interfaces.EntriesRepository
-import remote.interfaces.SchoolsMapRepository
-import remote.dto.sirs_courseFilter.SIRSCourseFilterResult
 import general.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
@@ -15,6 +11,10 @@ import io.ktor.serialization.kotlinx.*
 import kotlinx.serialization.json.Json
 import misc.pmap
 import misc.substringAfterBefore
+import remote.dto.sirs_courseFilter.SIRSCourseFilterResult
+import remote.interfaces.Api
+import remote.interfaces.EntriesRepository
+import remote.interfaces.SchoolsMapRepository
 
 class SIRSApi(private val API_KEY: String) : Api, SchoolsMapRepository, EntriesRepository {
     private val sirsClient = client.config {
