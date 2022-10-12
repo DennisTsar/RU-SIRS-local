@@ -15,7 +15,8 @@ fun EntriesMap.toEntriesByProfMap(): EntriesByProfMap =
 
 private fun String.likelyMultipleProfs(): Boolean {
     val listOfAccepted = setOf(
-        "der", "de", "da", "la", "ii", "iii", "iv", "uz", "el", "van",
+        "der", "de", "da", "del", "la", "uz", "el", "van",  // also used in formatFullName() (forwards + backwards)
+        "ii", "iii", "iv", "col", // also used in formatFullName() (only backwards)
         "ed.d.", "ezzat", "dagracia", "desilva", "sai", "rui", "graca", "mai", "n", "fache"
     )
     val altered = replace(" \\(.*\\)|-".toRegex(), "") // replace content in parentheses & removes dashes
@@ -107,8 +108,8 @@ private fun Entry.formatFullName(): String {
         .let { split ->
             // un-separate the specials from other parts of the name
             // first combine them forwards, then backwards
-            val forwards = setOf("der", "de", "da", "la", "uz", "el", "van")
-            val backwards = forwards + setOf("ii", "iii", "iv")
+            val forwards = setOf("der", "de", "da", "del", "la", "uz", "el", "van")
+            val backwards = forwards + setOf("ii", "iii", "iv", "col")
             split.fold(emptyList<String>()) { acc, s ->
                 acc.lastOrNull()
                     ?.takeIf { it.split(" ").last().lowercase() in forwards }
