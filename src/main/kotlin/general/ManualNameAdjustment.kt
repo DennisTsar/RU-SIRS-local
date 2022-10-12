@@ -641,6 +641,140 @@ fun manualNameAdjustment(prof: String, code: String): String {
             else -> prof
         }
 
+        "03:690" -> when (prof) {
+            "CAPT, J", "MURRAY, CAPT" -> "MURRAY, JANICE"
+            "CAPT, GONZALEZ" -> "GONZALEZ, KEVIN"
+            "CAPT, MANNING" -> "MANNING, OMAR"
+            "DANYLUK, LT COL", "LT COL, DANYLUK" -> "DANYLUK, DEBORAH"
+            "MARINELLI, CAPT" -> "MARINELLI, VINCENT"
+            "MCANDREW, LT COL", "LT COL, MCANDRE" -> "MCANDREW, MATTHEW"
+            "STEVENS, CAPT", "CAPT, K" -> "STEVENS, KAYLA"
+            else -> prof
+        }
+
+        "03:691" -> when (prof) {
+            "LOY, MAJOR" -> "LOY, STUART"
+            "VENDETTI, ERIC", "VENDITTI, CAPLAIN" -> "VENDITTI, ERIC" // 2nd probably
+            else -> prof
+        }
+
+        "03:692" -> when (prof) {
+            "FORSYTH, LT" -> "FORSYTH, SEAN" // probably
+            "PATRICK, CDR" -> "PATRICK, HADEN" // probably
+            "RAMEY, CPT" -> "RAMEY, CAPT"
+            else -> prof
+        }
+
+        "04:189" -> when (prof) {
+            "DOOL, RAYMOND" -> "DOOL, RICHARD" // 04:192
+            "KANG, KYUNGWON" -> "KANG, KATIE"
+            "LINARDOPOULOS, NICK" -> "LINARDOPOULOS, NIKOLAOS" // 01:192
+            "LISCHER-KATZ, ZACK" -> "LISCHER-KATZ, ZACHARIAH"
+            "MCCORMICK, PHILLIP" -> "MCCORMICK, PHILIP"
+            "PICHIGUN, ALEX" -> "PICHUGIN, ALEXANDER" // 01:547
+            "STOERGER, SHARN" -> "STOERGER, SHARON"
+            else -> prof
+        }
+
+        "04:192" -> when (prof) {
+            "AAHKUS, MARK" -> "AAKHUS, MARK"
+            "BAIA, CHIS" -> "BAIA, CHRIS"
+            "DOOL, RAYMOND" -> "DOOL, RICHARD" // 04:189
+            "DYWER, MARIA" -> "DWYER, MARIA"
+            "ENTER, ROBERTA" -> "ENTNER, ROBERTA"
+            "GIGLIOTTI, RALPH" -> "GIGLIOTTI, RAFFAELE"
+            "GRASSO, JACK" -> "GRASSO, JOHN"
+            "HERKY, PETER" -> "HERCKY, PETER"
+            "LAKHANI, DOLLY" -> "LAKHANI, DAULAT"
+            "LINARDOPOULOS, NICK" -> "LINARDOPOULOS, NIKOLAOS" // 01:189
+            "MOKROS, HARTY" -> "MOKROS, HARTMUT"
+            "NOGUIERA, K" -> "NOGUEIRA, KATHRYN"
+            "YOUN, HUNSOOK" -> "YOUN, HYUNSOOK"
+            else -> prof
+        }
+
+        "04:547" -> when (prof) {
+            "BAKELAAR, PHILLIP" -> "BAKELAAR, PHILIP"
+            "BARCLAY-PLATEN, LEANNE" -> "BARCLAY-PLATENBURG, LEANNE"
+            "BELKIN, NICK" -> "BELKIN, NICHOLAS"
+            "BINDE, BINDE" -> "BINDE, BETH"
+            "COLLICK, CHARLI" -> "COLLICK, CHARLES"
+            "DOYLE, MIKE" -> "DOYLE, MICHAEL"
+            "KERSCHNER, JR", "KERSCHNER, CHUCK" -> "KERSCHNER, CHARLES"
+            "O', CONNOR" -> "O'CONNOR, DANIEL"
+            "PICHIGUN, ALEX" -> "PICHUGIN, ALEXANDER" // 01:189
+            "POTOCKI, ADAM" -> "POTOCKI, RADOSLAW"
+            "SANCHEZ, JOE", "JOSE, SANCHEZ" -> "SANCHEZ, JOSE"
+            "UPDALE, BILL" -> "UPDALE, WILLIAM"
+            "WACHOLDER, NINA" -> "WACHOLDER, FAYE"
+            "WILLOUGHBY-LIT, SHAKIRA" -> "WILLOUGHBY-LITTLE, SHAKIRA"
+            "ZHOU, XIAOMU" -> "ZHOU, XIAMOU"
+            else -> prof
+        }
+
+        "04:567" -> when (prof) {
+            "ARONCYZK, MELISSA" -> "ARONCZYK, MELISSA"
+            "D'AMBRISIO, MARY" -> "D'AMBROSIO, MARY"
+            "DAVIS, TOM" -> "DAVIS, THOMAS"
+            "FELDMAN, ROGERS" -> "FELDMAN, LAUREN"
+            "FITZPATRICK, MICHEAL" -> "FITZPATRICK, MICHAEL"
+            "FUERST, LIZ" -> "FUERST, ELIZABETH"
+            "KALET, HANK" -> "KALET, HENRY" // probably
+            "MCCARTHY, MIKE" -> "MCCARTHY, MICHAEL"
+            "PAVLICHKO, MIKE" -> "PAVLICHKO, MICHAEL"
+            "RISPOLI, MIKE" -> "RISPOLI, MICHAEL"
+            "STRUPP, JOE" -> "STRUPP, JOSEPH"
+            else -> prof
+        }
+        "05:300" -> when (prof) {
+            "ANDREW, LELAND" -> "LELAND, ANDREW"
+            "ASHA, NAMBIAR" -> "NAMBIAR, ASHA"
+            "BOTT, CYNTHIA" -> "BOTT-TOMARCHIO, CYNTHIA"
+            "CUPELLO-WATERS, ALEXANDRA", "CUPELLO, WATERS", "CUPELLO-WATERS" -> "CUPELLO, ALEXANDRA"
+            "CYNTHIA, PANCER", "PANCER, CINDY" -> "PANCER, CYNTHIA"
+            "DELNERO, J" -> "DEL NERO, J"
+            "DEHAM-BARRETT" -> "DENHAM-BARRETT, MISTY"
+            "DOUGHTERTY, S" -> "DOUGHERTY, S" // probably, might b flipped
+            "GOLDIN, JERRY" -> "GOLDIN, GERALD"
+            "ELIZABETH, VASTANO" -> "VASTANO, ELIZABETH"
+            "EVAN, JAFFE" -> "JAFFE, EVAN"
+            "JAMES, LYNCH-URBANIAK", "URBANIAK, JAMES", "URBANIAK" -> "LYNCH-URBANIAK, JAMES"
+            "JAMES, O'KELLY" -> "O'KELLY, JAMES"
+            "KNOX, LISA" -> "KNOX-BROWN, LISA"
+            "LAZZARRO, HEATHER", "LAZZARRO, H" -> "LAZZARO, HEATHER"
+            "MAUCLAIRAUGUST, BRANDON", "MAUCLAIR-AUGUS" -> "MAUCLAIR-AUGUSTIN, BRANDON"
+            "MCHUGH, SANDEE" -> "MCHUGH-MCBRIDE, SANDEE"
+            "NOLEN, RYAN" -> "NOLEN, JIMMY" // maybe flipped
+            "PALPACUER-LEE, CHRISTELLE", "PALPACUER-LEE" -> "PALPACUER, CHRISTELLE"
+            "RANDALL, WEEKS" -> "RANDALL-WEEKS, MAQUEDA"
+            "WITCHEL, SUZANNE" -> "WICHTEL, SUZANNE"
+            "WOODWARD, KARIMA" -> "WOODYARD, KARIMA"
+            "DAKE, ZHANG" -> "ZHANG, DAKEN"
+            else -> prof
+        }
+
+        // I already started, but I've decided to end my manual contributions at this point
+//        "07:080" -> when (prof) {
+//            "DICKNISON, BRENT" -> "DICKINSON, BRENT"
+//            "PETERSON, ROB" -> "PETERSEN, ROBERT"
+//            else -> prof
+//        }
+//
+//        "07:081" -> when (prof) {
+//            "AKIN, ATIF" -> "AKIN, AHMET"
+//            "BEEGAN, GERRY" -> "BEEGAN, GERALD"
+//            "BRITTINGHAM, JIM" -> "BRITTINGHAM, JAMES"
+////            "DADABHOY, JACK" -> "DADABHOY, NABILA" // probably swapped first name / or "HOGAN, JACK"? (or both)
+////            "DEGAETANI, BRITTINGHA" -> "DEGAETANI, KATHERINE" // or "BRITTINGHAM, JAMES"? (or both)
+//            // I think "DADABHOY, JACK" and "DEGAETANI, BRITTINGHA" both  have non-matching first/last names
+//            "EDGARTON, BRIAN" -> "EDGERTON, BRIAN"
+//            "FIGUERDO, ENRIQUE" -> "FIGUEREDO, ENRIQUE"
+//            "FRANCIR, LINDA" -> "FRANCIS, LINDA"
+//            "MALISZEWSKI, BETTY" -> "MALISZEWSKI, MARY" // probably
+        // unfishished
+//            else -> prof
+//        }
+
         else -> prof
     }
 }
