@@ -1,16 +1,18 @@
 package remote.api
 
-import remote.interfaces.EntriesFromFileRepository
-import remote.interfaces.SchoolsMapRepository
+import general.EntriesByProf
+import general.EntriesByProfMap
 import general.Entry
 import general.School
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import misc.walkDirectory
+import remote.interfaces.EntriesFromFileRepository
+import remote.interfaces.SchoolsMapRepository
 import java.io.File
 
 class LocalApi(
-    val mainJsonDir: String = "json-data-9/",
+    val mainJsonDir: String = "json-data-9",
     private val extraJsonDir: String = "extra-json-data",
 ) : EntriesFromFileRepository, SchoolsMapRepository {
     override suspend fun getEntriesFromDir(school: String, dept: String, folderNum: Int): List<Entry> =
@@ -20,6 +22,18 @@ class LocalApi(
         return File(readDir).walkDirectory().associate { file ->
             val deptMap = file.walkDirectory().associate {
                 it.nameWithoutExtension to Json.decodeFromString<List<T>>(it.readText())
+            }
+            file.nameWithoutExtension to deptMap
+        }.filterValues { it.isNotEmpty() }
+    }
+
+    override suspend fun getEntriesByProfFromDir(school: String, dept: String, folderNum: Int): EntriesByProf =
+        Json.decodeFromString(File("json-data-$folderNum-by-prof/$school/$dept.json").readText())
+
+    fun getAllEntriesByProfInDir(readDir: String = "$mainJsonDir-by-prof"): EntriesByProfMap {
+        return File(readDir).walkDirectory().associate { file ->
+            val deptMap = file.walkDirectory().associate {
+                it.nameWithoutExtension to Json.decodeFromString<EntriesByProf>(it.readText())
             }
             file.nameWithoutExtension to deptMap
         }.filterValues { it.isNotEmpty() }

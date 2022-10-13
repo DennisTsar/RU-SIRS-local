@@ -1,6 +1,7 @@
 package general
 
 import kotlinx.serialization.Serializable
+import misc.pmap
 
 @Serializable
 data class School(
@@ -8,3 +9,11 @@ data class School(
     val name: String,
     val depts: Set<String>,
 )
+
+suspend fun <T> Collection<School>.generateSchoolsMap(
+    generator: suspend (school: String, dept: String) -> T,
+): SchoolDeptsMap<T> {
+    return pmap { school ->
+        school.code to school.depts.associateWith { generator(school.code, it) }
+    }.toMap()
+}

@@ -1,5 +1,6 @@
 package remote.api
 
+import general.EntriesByProf
 import general.Entry
 import general.School
 import io.ktor.client.call.*
@@ -22,13 +23,16 @@ class GithubApi : Api, EntriesFromFileRepository, SchoolsMapRepository {
             url {
                 protocol = URLProtocol.HTTPS
                 host = "raw.githubusercontent.com"
-                encodedPath = "/DennisTsar/Rutgers-SIRS/master/"
+                encodedPath = "/DennisTsar/Rutgers-SIRS/overhaul/"
             }
         }
     }
 
     override suspend fun getEntriesFromDir(school: String, dept: String, folderNum: Int): List<Entry> =
         ghClient.get("json-data-$folderNum/$school/$dept.json").body()
+
+    override suspend fun getEntriesByProfFromDir(school: String, dept: String, folderNum: Int): EntriesByProf =
+        ghClient.get("json-data-$folderNum-by-prof/$school/$dept.json").body()
 
     override suspend fun getSchoolsMap(): Map<String, School> =
         ghClient.get("extra-json-data/schoolDeptsMap.json").body()
