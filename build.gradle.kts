@@ -1,45 +1,22 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
+@Suppress("DSL_SCOPE_VIOLATION") // just to avoid "libs" red underline
 plugins {
-    kotlin("jvm") version "1.7.10"
-    kotlin("plugin.serialization") version "1.6.21"
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.serialization)
     application
 }
 
-group = "me.denny"
+group = "dev.letter"
 version = "1.0-SNAPSHOT"
-
-val ktorVersion = "2.1.2"
 
 repositories {
     mavenCentral()
-    maven {
-        url = uri("https://maven.pkg.jetbrains.space/public/p/ktor/eap")
-        name = "ktor-eap"
-    }
+    maven("https://maven.pkg.jetbrains.space/public/p/ktor/eap")
 }
 
 dependencies {
-    implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
-    implementation("io.ktor:ktor-client-core-jvm:2.1.2")
-    implementation("io.ktor:ktor-client-cio-jvm:2.1.2")
-    implementation("io.ktor:ktor-client-logging-jvm:2.1.2")
-    implementation("io.ktor:ktor-client-encoding-jvm:2.1.2")
-
-    testImplementation(kotlin("test"))
-
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
-}
-
-tasks.test {
-    useJUnitPlatform()
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
+    implementation(libs.coroutines)
+    implementation(libs.serialization)
+    implementation(libs.bundles.ktor)
 }
 
 application {
