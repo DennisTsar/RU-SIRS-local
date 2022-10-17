@@ -2,7 +2,7 @@ package general
 
 typealias SchoolDeptsMap<T> = Map<String, Map<String, T>>
 
-fun <T> SchoolDeptsMap<T>.forEachDept(action: (String, String, T) -> Unit){
+fun <T> SchoolDeptsMap<T>.forEachDept(action: (String, String, T) -> Unit) {
     forEach { (school, deptMap) ->
         deptMap.forEach { (dept, something) ->
             action(school, dept, something)

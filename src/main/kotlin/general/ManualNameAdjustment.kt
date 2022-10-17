@@ -726,6 +726,7 @@ fun manualNameAdjustment(prof: String, code: String): String {
             "STRUPP, JOE" -> "STRUPP, JOSEPH"
             else -> prof
         }
+
         "05:300" -> when (prof) {
             "ANDREW, LELAND" -> "LELAND, ANDREW"
             "ASHA, NAMBIAR" -> "NAMBIAR, ASHA"

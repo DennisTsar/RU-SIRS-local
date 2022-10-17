@@ -1,32 +1,35 @@
 package general
 
+import data.Entry
+import data.School
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import misc.makeFileAndDir
 import misc.pmap
 import misc.similarity
-import remote.api.LocalApi
-import remote.api.SIRSApi
-import remote.api.SOCApi
-import remote.interfaces.EntriesRepository
+import remote.interfaces.EntriesSource
+import remote.sources.LocalSource
+import remote.sources.SIRSSource
+import remote.sources.SOCSource
 
 val globalSetOfQs = mutableSetOf<String>()
 
 fun main() {
     // region json-data-9
-//    val oldEntriesMap = LocalApi().getAllEntriesInDir<Entry>("spring-2014-entries")
-//    repo.getAllEntriesInDir<Entry>("json-data-8")
+    val localSource = LocalSource()
+//    val oldEntriesMap = localSource.getAllEntriesInDir<Entry>("spring-2014-entries")
+//    localSource.getAllEntriesInDir<Entry>("json-data-8")
 //        .addOldEntries(oldEntriesMap)
 //        .semicolonCleanup()
 //        .writeToDir("json-data-9")
     // endregion
 
     // region json-data-8
-//    val sirsApi = SIRSApi(SIRS_API_KEY)
-//    val schoolsMap = runBlocking { sirsApi.getCompleteSchoolsMap() }
+//    val sirsSource = SIRSSource(SIRS_API_KEY)
+//    val schoolsMap = runBlocking { sirsSource.getCompleteSchoolsMap() }
 //    parseEntriesFromSIRS(
-//        sirsApi,
+//        sirsSource,
 //        schoolsMap,
 //        { Json.encodeToString(this) },
 //        "json-data-8",
@@ -34,11 +37,11 @@ fun main() {
 //    )
     //endregion
 
-    val entriesMap = LocalApi().getAllEntriesInDir<Entry>("json-data-9")
+    val entriesMap = LocalSource().getAllEntriesInDir<Entry>("json-data-9")
     entriesMap.toEntriesByProfMap().printPossibleNameAdjustments()
 
 //    runBlocking {
-//        val socRes = repository.getSOCData()
+//        val socRes = socSource.getSOCData()
 //            .substringAfterBefore("<div id=\"initJsonData\" style=\"display:none;\">", "</div>")
 //        Json.decodeFromString<SOCData>(socRes)
 //            .subjects.associate { it.code to it.description }
@@ -51,13 +54,13 @@ fun main() {
 
 //To get CSV, pass ::csvFromEntries, to get JSONs, { Json.encodeToString(this) }
 fun parseDeptsFromSIRS(
-    entriesRepository: EntriesRepository,
+    entriesSource: EntriesSource,
     schoolDeptsMap: Map<String, School>,
     stringForFile: List<Entry>.() -> String?,
     writeDir: String,
     extraEntries: EntriesMap = emptyMap(),
 ) {
-    runBlocking { entriesRepository.getAllLatestEntries(schoolDeptsMap.values) }.addOldEntries(extraEntries)
+    runBlocking { entriesSource.getAllLatestEntries(schoolDeptsMap.values) }.addOldEntries(extraEntries)
         .forEach { (school, deptsMap) ->
             deptsMap.forEach dept@{ (dept, entries) ->
                 globalSetOfQs.addAll(entries.flatMap { it.questions ?: emptyList() })
@@ -73,7 +76,7 @@ fun parseDeptsFromSIRS(
 //    schoolDeptsMap.forEach { (school, value) ->
 //        value.depts.forEach dept@{ dept ->
 //            // Wanted to have "launch" here for async but that breaks Rutgers servers
-//            val entries = runBlocking { entriesRepository.getLatestEntriesInDept(school, dept) }.ifEmpty { return@dept }
+//            val entries = runBlocking { entriesSource.getLatestEntriesInDept(school, dept) }.ifEmpty { return@dept }
 //                .plus(extraEntries[school]?.get(dept).orEmpty())
 //            globalSetOfQs.addAll(entries.map { it.questions ?: emptyList() }.flatten())
 //            println("banana $globalSetOfQs")
@@ -87,7 +90,7 @@ fun parseDeptsFromSIRS(
 }
 
 fun parseEntriesFromSIRS(
-    repository: SIRSApi,
+    sirsSource: SIRSSource,
     schoolDeptsMap: Map<String, School>,
     stringForFile: List<Entry>.() -> String?,
     writeDir: String,
@@ -100,7 +103,7 @@ fun parseEntriesFromSIRS(
         (value.depts + extra).map { dept ->
             //Wanted to have "launch" here for async but that breaks Rutgers servers
             val entries = runBlocking {
-                semesters.pmap { repository.getEntriesByDeptOrCourse(it, school, dept) }
+                semesters.pmap { sirsSource.getEntriesByDeptOrCourse(it, school, dept) }
             }.flatten().plus(extraEntries[school]?.get(dept).orEmpty()).ifEmpty { return@map null }
 
             dept to entries
@@ -116,13 +119,13 @@ fun parseEntriesFromSIRS(
 }
 
 fun getInstructors(
-    repository: SOCApi = SOCApi(),
+    socSource: SOCSource = SOCSource(),
     semYear: SemYear = DefaultParams.semYear,
     campuses: List<Campus> = Campus.values().toList(),
     writeDir: String? = null, // if null, don't write to file
 ): Map<String, List<String>> {
     return runBlocking {
-        campuses.flatMap { repository.getCourses(semYear, it) }
+        campuses.flatMap { socSource.getCourses(semYear, it) }
             .groupBy(keySelector = { it.courseString }, valueTransform = { courseListing ->
                 courseListing.sections.flatMap { section ->
                     section.instructors.map { it.name }
@@ -142,7 +145,7 @@ fun EntriesByProfMap.printPossibleNameAdjustments(printURL: Boolean = true) {
     forEachDept { school, dept, profMap ->
         val names = profMap.keys.sorted()
         val pairs = names.mapIndexed { index, s ->
-            if (s.substringBefore(",").length==1)
+            if (s.substringBefore(",").length == 1)
                 println("swapped? ($school-$dept): $s")
             names.drop(index + 1).map { Pair(s, it) }
         }.flatten()
@@ -165,9 +168,11 @@ fun EntriesByProfMap.printPossibleNameAdjustments(printURL: Boolean = true) {
                             .takeWhile { (x, y) -> x == y }
                             .map { it.first }.joinToString("")
                     }
-                if(printURL)
-                    println(" https://sirs.ctaar.rutgers.edu/index.php?mode=name&survey%5Blastname%5D=$common" +
-                            "&survey%5Bsemester%5D=&survey%5Byear%5D=&survey%5Bschool%5D=&survey%5Bdept%5D=$dept)")
+                if (printURL)
+                    println(
+                        " https://sirs.ctaar.rutgers.edu/index.php?mode=name&survey%5Blastname%5D=$common" +
+                                "&survey%5Bsemester%5D=&survey%5Byear%5D=&survey%5Bschool%5D=&survey%5Bdept%5D=$dept)"
+                    )
                 else println()
             }
             println("\telse -> prof\n}")

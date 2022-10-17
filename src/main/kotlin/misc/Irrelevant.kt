@@ -1,11 +1,11 @@
 package misc
 
-import remote.api.LocalApi
+import data.Entry
 import general.EntriesMap
-import general.Entry
+import remote.sources.LocalSource
 
 fun validateMapOfEntries(
-    map1: EntriesMap = LocalApi().getAllEntriesInDir(),
+    map1: EntriesMap = LocalSource().getAllEntriesInDir(),
     map2: EntriesMap,
 ) {
     map1.forEach { (k, v) ->
@@ -24,9 +24,9 @@ fun validateMapOfEntries(
 }
 
 fun compareDataDirs(dir1: String, dir2: String, compareSizes: Boolean = true) {
-    val api = LocalApi()
-    val map1 = api.getAllEntriesInDir<Entry>(dir1)
-    val map2 = api.getAllEntriesInDir<Entry>(dir2)
+    val localSource = LocalSource()
+    val map1 = localSource.getAllEntriesInDir<Entry>(dir1)
+    val map2 = localSource.getAllEntriesInDir<Entry>(dir2)
 
     // region silliness
     val compareSchoolsMap: Map<*, Map<*, List<*>>>.(Map<*, *>, String, String) -> Unit =
