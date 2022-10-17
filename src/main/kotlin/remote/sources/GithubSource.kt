@@ -23,7 +23,7 @@ class GithubSource : RemoteApi, EntriesFromFileSource, SchoolsMapSource {
             url {
                 protocol = URLProtocol.HTTPS
                 host = "raw.githubusercontent.com"
-                encodedPath = "/DennisTsar/Rutgers-SIRS/overhaul/"
+                encodedPath = "/DennisTsar/Rutgers-SIRS/master/"
             }
         }
     }
