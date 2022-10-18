@@ -1,6 +1,6 @@
 package general
 
-import data.Entry
+import Entry
 import data.School
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString

@@ -1,6 +1,6 @@
 package misc
 
-import data.Entry
+import Entry
 import general.EntriesMap
 import remote.sources.LocalSource
 

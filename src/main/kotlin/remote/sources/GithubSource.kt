@@ -1,6 +1,6 @@
 package remote.sources
 
-import data.Entry
+import Entry
 import data.School
 import general.EntriesByProf
 import io.ktor.client.call.*

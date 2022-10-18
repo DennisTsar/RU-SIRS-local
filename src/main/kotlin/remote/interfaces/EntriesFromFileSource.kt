@@ -1,6 +1,6 @@
 package remote.interfaces
 
-import data.Entry
+import Entry
 import data.School
 import data.generateSchoolsMap
 import general.EntriesByProf

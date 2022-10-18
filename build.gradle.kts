@@ -16,6 +16,7 @@ dependencies {
     implementation(libs.coroutines)
     implementation(libs.serialization)
     implementation(libs.bundles.ktor.local)
+    implementation(project(":common"))
 }
 
 application {

@@ -1,6 +1,6 @@
 package general
 
-import data.Entry
+import Entry
 
 typealias EntriesByProf = Map<String, List<Entry>>
 typealias EntriesByProfMap = SchoolDeptsMap<EntriesByProf>

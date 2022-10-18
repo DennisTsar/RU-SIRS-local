@@ -1,10 +1,10 @@
 package misc
 
-import data.Entry
+import Entry
+import QsMap
+import TenQs
 import data.old_data.EntryOld3
 import general.EntriesMap
-import general.QsMap
-import general.TenQs
 import general.writeToDir
 import remote.sources.LocalSource
 

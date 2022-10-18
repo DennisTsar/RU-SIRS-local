@@ -1,6 +1,6 @@
 package general
 
-import data.Entry
+import Entry
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import misc.makeFileAndDir

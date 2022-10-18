@@ -1,6 +1,6 @@
 package general
 
-import data.Entry
+import Entry
 import misc.roundToDecimal
 
 fun List<Entry>.toCsv(): String? {

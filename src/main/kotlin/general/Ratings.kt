@@ -1,6 +1,6 @@
 package general
 
-import data.Entry
+import Entry
 import misc.roundToDecimal
 
 typealias Ratings = List<List<Int>>
