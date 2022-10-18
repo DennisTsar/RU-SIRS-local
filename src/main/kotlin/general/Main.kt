@@ -15,7 +15,11 @@ import remote.sources.SOCSource
 
 val globalSetOfQs = mutableSetOf<String>()
 
-fun main() {
+fun main(args: Array<String>) {
+    if (args.firstOrNull() == "-instructor"){
+        getInstructors(writeDir = "extra-json-data/instructors-latest")
+        return
+    }
     // region json-data-9
     val localSource = LocalSource()
 //    val oldEntriesMap = localSource.getAllEntriesInDir<Entry>("spring-2014-entries")
@@ -37,9 +41,6 @@ fun main() {
 //    )
     //endregion
 
-
-    val a = getInstructors(writeDir = "extra-json-data/instructors-latest")
-    a.forEach { (k, v) -> println("$k:\n $v") }
 //    val entriesMap = LocalSource().getAllEntriesInDir<Entry>("json-data-9")
 //    entriesMap.toEntriesByProfMap().printPossibleNameAdjustments()
 

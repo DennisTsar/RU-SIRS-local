@@ -19,5 +19,5 @@ dependencies {
 }
 
 application {
-    mainClass.set("MainKt")
+    mainClass.set("general.MainKt")
 }
