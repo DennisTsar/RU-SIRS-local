@@ -37,8 +37,11 @@ fun main() {
 //    )
     //endregion
 
-    val entriesMap = LocalSource().getAllEntriesInDir<Entry>("json-data-9")
-    entriesMap.toEntriesByProfMap().printPossibleNameAdjustments()
+
+    val a = getInstructors(writeDir = "extra-json-data/instructors-latest")
+    a.forEach { (k, v) -> println("$k:\n $v") }
+//    val entriesMap = LocalSource().getAllEntriesInDir<Entry>("json-data-9")
+//    entriesMap.toEntriesByProfMap().printPossibleNameAdjustments()
 
 //    runBlocking {
 //        val socRes = socSource.getSOCData()
@@ -126,11 +129,15 @@ fun getInstructors(
 ): Map<String, List<String>> {
     return runBlocking {
         campuses.flatMap { socSource.getCourses(semYear, it) }
-            .groupBy(keySelector = { it.courseString }, valueTransform = { courseListing ->
-                courseListing.sections.flatMap { section ->
-                    section.instructors.map { it.name }
+            .groupBy(
+                keySelector = { it.courseString },
+                valueTransform = { courseListing ->
+                    courseListing.sections.flatMap { section ->
+                        section.instructors.map { it.name }
+                    }
                 }
-            }).mapValues { it.value.flatten().sorted() }.filterValues { it.isNotEmpty() } // yes filtering is needed
+            ).mapValues { it.value.flatten().distinct().sorted() }
+            .filterValues { it.isNotEmpty() } // yes filtering is needed
     }.also { instructorsMap ->
         writeDir?.let {
             val file = makeFileAndDir("$it.json")

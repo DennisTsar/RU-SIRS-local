@@ -74,7 +74,7 @@ class SIRSSource(private val API_KEY: String) : RemoteApi, SchoolsMapSource, Ent
     }
 
     suspend fun getSchoolsOrDepts(
-        semYear: SemYear = DefaultParams.prevSemester,
+        semYear: SemYear = DefaultParams.lastSirsSem,
         school: String = "",
     ): SIRSCourseFilterResult {
         return sirsClient.config {

@@ -2,18 +2,16 @@ package general
 
 @Suppress("MemberVisibilityCanBePrivate")
 object DefaultParams {
-    val semYear = SemYear(Semester.Fall, 2022)
+    val semYear = SemYear(Semester.Spring, 2023)
     val campus = Campus.NB
     val levelOfStudy = LevelOfStudy.U
 
     // sirs stuff
-    val prevSemester = SemYear(
-        semYear.semester.other(), semYear.year - semYear.semester.other().ordinal
-    )
+    val lastSirsSem = SemYear(Semester.Spring, 2022)
     private val firstSemYear = SemYear(Semester.Fall, 2014)
-    val sirsRange = (firstSemYear.year..prevSemester.year).flatMap { year ->
+    val sirsRange = (firstSemYear.year..lastSirsSem.year).flatMap { year ->
         Semester.values().map { sem -> SemYear(sem, year) }
-    }.drop(firstSemYear.semester.ordinal).dropLast(prevSemester.semester.other().ordinal)
+    }.drop(firstSemYear.semester.ordinal).dropLast(lastSirsSem.semester.other().ordinal)
 }
 
 data class SemYear(val semester: Semester, val year: Int)
