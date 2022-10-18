@@ -1,7 +1,7 @@
 package general
 
 import Entry
-import misc.roundToDecimal
+import roundToDecimal
 
 fun List<Entry>.toCsv(): String? {
     val profRatings = mapByProfs()
