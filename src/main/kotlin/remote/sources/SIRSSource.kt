@@ -14,11 +14,11 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.*
 import kotlinx.serialization.json.Json
-import misc.substringAfterBefore
+import substringAfterBefore
 import pmap
-import remote.interfaces.EntriesSource
-import remote.interfaces.RemoteApi
-import remote.interfaces.SchoolsMapSource
+import remote.EntriesSource
+import remote.RemoteApi
+import remote.SchoolsMapSource
 
 class SIRSSource(private val API_KEY: String) : RemoteApi, SchoolsMapSource, EntriesSource {
     private val sirsClient = client.config {

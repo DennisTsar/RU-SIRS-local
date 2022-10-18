@@ -1,5 +1,7 @@
 package general
 
+import EntriesByProfMap
+import EntriesMap
 import Entry
 import School
 import forEachDept
@@ -9,7 +11,7 @@ import kotlinx.serialization.json.Json
 import misc.makeFileAndDir
 import misc.similarity
 import pmap
-import remote.interfaces.EntriesSource
+import remote.EntriesSource
 import remote.sources.LocalSource
 import remote.sources.SIRSSource
 import remote.sources.SOCSource

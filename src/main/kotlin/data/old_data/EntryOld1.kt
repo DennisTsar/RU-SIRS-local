@@ -1,7 +1,7 @@
 package data.old_data
 
 import kotlinx.serialization.Serializable
-import misc.substringAfterBefore
+import substringAfterBefore
 
 @Serializable
 class EntryOld1(

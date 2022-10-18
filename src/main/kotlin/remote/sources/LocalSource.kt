@@ -2,13 +2,13 @@ package remote.sources
 
 import Entry
 import School
-import general.EntriesByProf
-import general.EntriesByProfMap
+import EntriesByProf
+import EntriesByProfMap
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import misc.walkDirectory
-import remote.interfaces.EntriesFromFileSource
-import remote.interfaces.SchoolsMapSource
+import remote.EntriesFromFileSource
+import remote.SchoolsMapSource
 import java.io.File
 
 class LocalSource(

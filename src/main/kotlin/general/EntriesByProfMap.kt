@@ -1,11 +1,10 @@
 package general
 
+import EntriesByProf
+import EntriesByProfMap
+import EntriesMap
 import Entry
-import SchoolDeptsMap
 import mapEachDept
-
-typealias EntriesByProf = Map<String, List<Entry>>
-typealias EntriesByProfMap = SchoolDeptsMap<EntriesByProf>
 
 fun EntriesMap.toEntriesByProfMap(): EntriesByProfMap =
     mapEachDept { _, _, entries ->

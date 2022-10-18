@@ -12,8 +12,8 @@ import io.ktor.client.request.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import misc.substringAfterBefore
-import remote.interfaces.RemoteApi
+import substringAfterBefore
+import remote.RemoteApi
 
 private const val SOC_BASE_URL = "https://sis.rutgers.edu/soc"
 

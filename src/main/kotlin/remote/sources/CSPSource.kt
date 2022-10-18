@@ -5,7 +5,7 @@ import general.LevelOfStudy
 import general.Semester
 import io.ktor.client.call.*
 import io.ktor.client.request.*
-import remote.interfaces.RemoteApi
+import remote.RemoteApi
 
 // get API_KEY from "Cookie" header when making this request in browser
 // only "JSESSIONID" and "sims-csp" values are needed, but it's fine to include others
