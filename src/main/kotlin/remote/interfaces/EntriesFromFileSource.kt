@@ -1,10 +1,10 @@
 package remote.interfaces
 
 import Entry
-import data.School
-import data.generateSchoolsMap
+import School
 import general.EntriesByProf
 import general.EntriesByProfMap
+import generateSchoolsMap
 
 interface EntriesFromFileSource : EntriesSource {
     suspend fun getEntriesFromDir(school: String, dept: String, folderNum: Int = 9): List<Entry>

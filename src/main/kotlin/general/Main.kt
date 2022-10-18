@@ -1,13 +1,14 @@
 package general
 
 import Entry
-import data.School
+import School
+import forEachDept
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import misc.makeFileAndDir
-import misc.pmap
 import misc.similarity
+import pmap
 import remote.interfaces.EntriesSource
 import remote.sources.LocalSource
 import remote.sources.SIRSSource

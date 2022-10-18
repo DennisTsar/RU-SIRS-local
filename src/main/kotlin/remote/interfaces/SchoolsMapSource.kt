@@ -1,6 +1,6 @@
 package remote.interfaces
 
-import data.School
+import School
 
 interface SchoolsMapSource {
     suspend fun getSchoolsMap(): Map<String, School>

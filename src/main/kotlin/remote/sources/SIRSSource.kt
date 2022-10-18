@@ -1,7 +1,7 @@
 package remote.sources
 
 import Entry
-import data.School
+import School
 import data.sirs_courseFilter.SIRSCourseFilterResult
 import general.DefaultParams
 import general.SemYear
@@ -14,8 +14,8 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.*
 import kotlinx.serialization.json.Json
-import misc.pmap
 import misc.substringAfterBefore
+import pmap
 import remote.interfaces.EntriesSource
 import remote.interfaces.RemoteApi
 import remote.interfaces.SchoolsMapSource
