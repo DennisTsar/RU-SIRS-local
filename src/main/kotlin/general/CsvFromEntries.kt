@@ -1,6 +1,8 @@
 package general
 
 import Entry
+import getRatingStats
+import getTotalRatings
 import roundToDecimal
 
 fun List<Entry>.toCsv(): String? {
