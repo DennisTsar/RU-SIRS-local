@@ -17,7 +17,7 @@ val globalSetOfQs = mutableSetOf<String>()
 
 fun main(args: Array<String>) {
     if (args.firstOrNull() == "-instructor"){
-        getInstructors(writeDir = "extra-json-data/instructors-latest")
+        getInstructors(writeDir = "extra-json-data/S23-instructors")
         return
     }
     // region json-data-9
