@@ -1,7 +1,7 @@
 name: Get Latest Instructors
 on:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 0,12 * * *"
 jobs:
   run:
     name: Get & Commit
