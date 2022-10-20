@@ -22,7 +22,7 @@ fun main(args: Array<String>) {
     if (args.firstOrNull() == "-instructor"){
         getInstructors(writeDir = "extra-json-data/S23-instructors")
         return
-    }
+    } // test change
     // region json-data-9
     val localSource = LocalSource()
 //    val oldEntriesMap = localSource.getAllEntriesInDir<Entry>("spring-2014-entries")
