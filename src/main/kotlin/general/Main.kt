@@ -8,6 +8,8 @@ import forEachDept
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import mapEachDept
+import misc.firstIfLone
 import misc.makeFileAndDir
 import misc.similarity
 import pmap
@@ -19,12 +21,12 @@ import remote.sources.SOCSource
 val globalSetOfQs = mutableSetOf<String>()
 
 fun main(args: Array<String>) {
-    if (args.firstOrNull() == "-instructor"){
-        getInstructors(writeDir = "extra-json-data/S23-instructors")
+    if (args.firstOrNull() == "-instructor") {
+        getInstructors(writeDir = "json-data/extra-data/S23-instructors")
         return
     }
     // region json-data-9
-    val localSource = LocalSource()
+//    val localSource = LocalSource()
 //    val oldEntriesMap = localSource.getAllEntriesInDir<Entry>("spring-2014-entries")
 //    localSource.getAllEntriesInDir<Entry>("json-data-8")
 //        .addOldEntries(oldEntriesMap)
@@ -132,7 +134,9 @@ fun getInstructors(
     writeDir: String? = null, // if null, don't write to file
 ): Map<String, List<String>> {
     return runBlocking {
-        campuses.flatMap { socSource.getCourses(semYear, it) }
+        val entries = LocalSource().getAllEntriesByProfInDir().mapEachDept { _, _, map -> map.keys }
+
+        val courseToProfs = campuses.flatMap { socSource.getCourses(semYear, it) }
             .groupBy(
                 keySelector = { it.courseString },
                 valueTransform = { courseListing ->
@@ -140,15 +144,34 @@ fun getInstructors(
                         section.instructors.map { it.name }
                     }
                 }
-            ).mapValues { it.value.flatten().distinct().sorted() }
-            .filterValues { it.isNotEmpty() } // yes filtering is needed
+            ).mapValues { (key, value) ->
+                val existingNames = run {
+                    val (school, dept, _) = key.split(":")
+                    entries[school]?.get(dept)
+                } ?: return@mapValues emptyList()
+                value.flatten().distinct().mapNotNull { originalName ->
+                    val name = originalName.run {
+                        if (" " in this && "," !in this) replace(" ", ", ")
+                        else this
+                    }
+                    existingNames.filter { it.startsWith(name) }.firstIfLone()
+                        ?: existingNames.filter { it == name.take(name.indexOf(",") + 3) }.firstIfLone()
+                        ?: existingNames.filter { it.startsWith(name.substringBefore(",")) }.firstIfLone()
+                }.sorted()
+            }.filterValues { it.isNotEmpty() }
+            .also { println("${it.size} courses with profs, ${it.count { (_,v) -> v.size>1 }} with 2+ profs") }
+
+        val profToCourses = courseToProfs.flatMap { (key, value) ->
+            value.map { "$it ${key.substringBeforeLast(":")}" to key }
+        }.groupBy(keySelector = { it.first }, valueTransform = { it.second })
+            .also { println("${it.size} profs with courses") }
+
+        (profToCourses + courseToProfs).toSortedMap().toMap()
     }.also { instructorsMap ->
         writeDir?.let {
             val file = makeFileAndDir("$it.json")
             file.writeText(Json.encodeToString(instructorsMap))
         }
-        println("Amount of courses with at least one known prof: ${instructorsMap.size}")
-        println("Amount w/at least 2 profs: ${instructorsMap.count { it.value.size > 2 }}")
     }
 }
 
