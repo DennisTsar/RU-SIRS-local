@@ -39,7 +39,6 @@ jobs:
           git push
       - name: Add & Commit to RU-SIRS
         run: |
-          cd ..
           git add local
           git checkout master
           git commit -m "Update to use latest instructor data"
