@@ -41,7 +41,7 @@ jobs:
           git commit -m "Updated latest instructors"
           git push
           cd ..
-          git checkout master
           git add local
+          git checkout master
           git commit -m "Updat to use latest instructor data"
           git push
