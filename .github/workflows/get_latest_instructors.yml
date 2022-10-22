@@ -1,5 +1,6 @@
 name: Get Latest Instructors
 on:
+  workflow_dispatch:
   schedule:
     - cron: "0 0,12 * * *"
 jobs:
@@ -8,8 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Check out current repository
-      - name: Fetch Sources
+      - name: Checkout main repo
         uses: actions/checkout@v3
+        with:
+          repository: DennisTsar/RU-SIRS
 
       # Set up Java environment for the next steps
       - name: Set up Java
@@ -24,7 +27,7 @@ jobs:
 
       # Build & run application - update instructors file
       - name: Run
-        run: ./gradlew run --args="-instructor"
+        run: ./gradlew local:run --args="-instructor"
         
       # Update repo with generated file
       - name: Add & Commit
