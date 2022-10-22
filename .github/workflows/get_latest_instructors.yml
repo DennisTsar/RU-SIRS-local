@@ -14,6 +14,7 @@ jobs:
         with:
           repository: DennisTsar/RU-SIRS
           submodules: recursive
+          token: ${{ secrets.PAT }}
 
       # Set up Java environment for the next steps
       - name: Set up Java
@@ -27,7 +28,7 @@ jobs:
         run: ./gradlew local:run --args="-instructor"
         
       # Update repo with generated file
-      - name: Add & Commit
+      - name: Add & Commit to Rutgers-SIRS
         run: |
           cd local
           git config --global user.name github-actions
@@ -36,8 +37,10 @@ jobs:
           git add .
           git commit -m "Updated latest instructors"
           git push
+      - name: Add & Commit to RU-SIRS
+        run: |
           cd ..
           git add local
           git checkout master
-          git commit -m "Updat to use latest instructor data"
+          git commit -m "Update to use latest instructor data"
           git push
