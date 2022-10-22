@@ -35,7 +35,7 @@ jobs:
           git config --global user.email github-actions@github.com
           git checkout master
           git add .
-          git commit -m "Updated latest instructors"
+          git commit -m "Updated latest instructors" || echo "Nothing to push"
           git push
       - name: Add & Commit to RU-SIRS
         run: |
