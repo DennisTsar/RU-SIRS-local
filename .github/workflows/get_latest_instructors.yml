@@ -22,10 +22,6 @@ jobs:
           distribution: 'temurin' # See 'Supported distributions' for available options
           java-version: '11'
 
-      # Validate wrapper
-      - name: Validate Gradle Wrapper
-        uses: gradle/wrapper-validation-action@v1
-
       # Build & run application - update instructors file
       - name: Run
         run: ./gradlew local:run --args="-instructor"
