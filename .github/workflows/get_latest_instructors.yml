@@ -43,7 +43,7 @@ jobs:
             echo "CHANGE=false" >> $GITHUB_OUTPUT
           fi
       - name: Add & Commit to RU-SIRS
-        if: ${{steps.git.outputs.CHANGE}} != 'false"
+        if: ${{steps.git.outputs.CHANGE}} != 'false'
         run: |
           git add local
           git commit -m "Updated latest instructors"
