@@ -45,7 +45,6 @@ jobs:
       - name: Add & Commit to RU-SIRS
         if: steps.git.outputs.CHANGE != 'false'
         run: |
-          echo "${{steps.git.outputs.CHANGE}}"
           git add local
           git commit -m "Updated latest instructors"
           git push
