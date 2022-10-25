@@ -29,16 +29,18 @@ jobs:
         
       # Update repo with generated file
       - name: Add & Commit to Rutgers-SIRS
+        id: git
         run: |
           cd local
           git config --global user.name github-actions
           git config --global user.email github-actions@github.com
           git checkout master
           git add .
-          git commit -m "Updated latest instructors" || echo "Nothing to push"
+          git commit -m "Updated latest instructors" || echo '::set-output name=CHANGE::FALSE'
           git push
       - name: Add & Commit to RU-SIRS
+        if: ${{steps.git.outputs.CHANGE}} != 'FALSE"
         run: |
           git add local
-          git commit -m "Update to use latest instructor data"
+          git commit -m "Updated latest instructors"
           git push
