@@ -36,7 +36,7 @@ jobs:
           git config --global user.email github-actions@github.com
           git checkout master
           git add .
-          git commit -m "Updated latest instructors" || echo "CHANGE=false" >> $GITHUB_OUTPUT
+          git commit -m "Updated latest instructors" || (echo "CHANGE=false" >> $GITHUB_OUTPUT)
           git push
       - name: Add & Commit to RU-SIRS
         if: ${{steps.git.outputs.CHANGE}} != 'false"
