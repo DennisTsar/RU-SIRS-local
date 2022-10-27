@@ -685,6 +685,7 @@ fun manualNameAdjustment(prof: String, code: String): String {
             "GIGLIOTTI, RALPH" -> "GIGLIOTTI, RAFFAELE"
             "GRASSO, JACK" -> "GRASSO, JOHN"
             "HERKY, PETER" -> "HERCKY, PETER"
+            "HOUSEHOLDER, BRAIN" -> "HOUSEHOLDER, BRIAN"
             "LAKHANI, DOLLY" -> "LAKHANI, DAULAT"
             "LINARDOPOULOS, NICK" -> "LINARDOPOULOS, NIKOLAOS" // 01:189
             "MOKROS, HARTY" -> "MOKROS, HARTMUT"
@@ -754,27 +755,26 @@ fun manualNameAdjustment(prof: String, code: String): String {
             else -> prof
         }
 
-        // I already started, but I've decided to end my manual contributions at this point
-//        "07:080" -> when (prof) {
-//            "DICKNISON, BRENT" -> "DICKINSON, BRENT"
-//            "PETERSON, ROB" -> "PETERSEN, ROBERT"
-//            else -> prof
-//        }
-//
-//        "07:081" -> when (prof) {
-//            "AKIN, ATIF" -> "AKIN, AHMET"
-//            "BEEGAN, GERRY" -> "BEEGAN, GERALD"
-//            "BRITTINGHAM, JIM" -> "BRITTINGHAM, JAMES"
-////            "DADABHOY, JACK" -> "DADABHOY, NABILA" // probably swapped first name / or "HOGAN, JACK"? (or both)
-////            "DEGAETANI, BRITTINGHA" -> "DEGAETANI, KATHERINE" // or "BRITTINGHAM, JAMES"? (or both)
-//            // I think "DADABHOY, JACK" and "DEGAETANI, BRITTINGHA" both  have non-matching first/last names
-//            "EDGARTON, BRIAN" -> "EDGERTON, BRIAN"
-//            "FIGUERDO, ENRIQUE" -> "FIGUEREDO, ENRIQUE"
-//            "FRANCIR, LINDA" -> "FRANCIS, LINDA"
-//            "MALISZEWSKI, BETTY" -> "MALISZEWSKI, MARY" // probably
-        // unfishished
-//            else -> prof
-//        }
+        // Random uncompleted things
+        "07:080" -> when (prof) {
+            "DICKNISON, BRENT" -> "DICKINSON, BRENT"
+            "PETERSON, ROB" -> "PETERSEN, ROBERT"
+            else -> prof
+        }
+
+        "07:081" -> when (prof) {
+            "AKIN, ATIF" -> "AKIN, AHMET"
+            "BEEGAN, GERRY" -> "BEEGAN, GERALD"
+            "BRITTINGHAM, JIM" -> "BRITTINGHAM, JAMES"
+//            "DADABHOY, JACK" -> "DADABHOY, NABILA" // probably swapped first name / or "HOGAN, JACK"? (or both)
+//            "DEGAETANI, BRITTINGHA" -> "DEGAETANI, KATHERINE" // or "BRITTINGHAM, JAMES"? (or both)
+            // I think "DADABHOY, JACK" and "DEGAETANI, BRITTINGHA" both  have non-matching first/last names
+            "EDGARTON, BRIAN" -> "EDGERTON, BRIAN"
+            "FIGUERDO, ENRIQUE" -> "FIGUEREDO, ENRIQUE"
+            "FRANCIR, LINDA" -> "FRANCIS, LINDA"
+            "MALISZEWSKI, BETTY" -> "MALISZEWSKI, MARY" // probably
+            else -> prof
+        }
 
         else -> prof
     }
