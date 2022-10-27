@@ -25,35 +25,6 @@ fun main(args: Array<String>) {
         getInstructors(writeDir = "json-data/extra-data/S23-instructors")
         return
     }
-    // region data-9-by-prof
-    val localSource = LocalSource()
-    localSource.getAllEntriesInDir<Entry>("json-data/data-9")
-        .toEntriesByProfMap()
-        .mapValues { (_, a) -> a.mapValues { (_,b) -> b.toSortedMap().toMap() } }
-        .writeToDir("json-data/data-9-by-prof")
-    // endregion
-
-    // region json-data-9
-//    val localSource = LocalSource()
-//    val oldEntriesMap = localSource.getAllEntriesInDir<Entry>("spring-2014-entries")
-//    localSource.getAllEntriesInDir<Entry>("json-data-8")
-//        .addOldEntries(oldEntriesMap)
-//        .semicolonCleanup()
-//        .writeToDir("json-data-9")
-    // endregion
-
-    // region json-data-8
-//    val sirsSource = SIRSSource(SIRS_API_KEY)
-//    val schoolsMap = runBlocking { sirsSource.getCompleteSchoolsMap() }
-//    parseEntriesFromSIRS(
-//        sirsSource,
-//        schoolsMap,
-//        { Json.encodeToString(this) },
-//        "json-data-8",
-//        DefaultParams.sirsRange,
-//    )
-    //endregion
-
 //    val entriesMap = LocalSource().getAllEntriesInDir<Entry>("json-data-9")
 //    entriesMap.toEntriesByProfMap().printPossibleNameAdjustments()
 
