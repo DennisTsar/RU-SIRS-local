@@ -25,6 +25,14 @@ fun main(args: Array<String>) {
         getInstructors(writeDir = "json-data/extra-data/S23-instructors")
         return
     }
+    // region data-9-by-prof
+    val localSource = LocalSource()
+    localSource.getAllEntriesInDir<Entry>("json-data/data-9")
+        .toEntriesByProfMap()
+        .mapValues { (_, a) -> a.mapValues { (_,b) -> b.toSortedMap().toMap() } }
+        .writeToDir("json-data/data-9-by-prof")
+    // endregion
+
     // region json-data-9
 //    val localSource = LocalSource()
 //    val oldEntriesMap = localSource.getAllEntriesInDir<Entry>("spring-2014-entries")
@@ -159,7 +167,7 @@ fun getInstructors(
                         ?: existingNames.filter { it.startsWith(name.substringBefore(",")) }.firstIfLone()
                 }.sorted()
             }.filterValues { it.isNotEmpty() }
-            .also { println("${it.size} courses with profs, ${it.count { (_,v) -> v.size>1 }} with 2+ profs") }
+            .also { println("${it.size} courses with profs, ${it.count { (_, v) -> v.size > 1 }} with 2+ profs") }
 
         val profToCourses = courseToProfs.flatMap { (key, value) ->
             value.map { "$it ${key.substringBeforeLast(":")}" to key }

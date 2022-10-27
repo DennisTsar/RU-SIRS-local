@@ -1,11 +1,12 @@
 package general
 
 import EntriesMap
+import SchoolDeptsMap
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import misc.makeFileAndDir
 
-fun EntriesMap.writeToDir(dir: String) {
+inline fun <reified T> SchoolDeptsMap<T>.writeToDir(dir: String) {
     forEach { (school, deptMap) ->
         deptMap.forEach { (dept, entries) ->
             Json.encodeToString(entries).let {
