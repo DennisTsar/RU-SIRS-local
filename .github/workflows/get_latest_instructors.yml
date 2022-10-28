@@ -1,4 +1,4 @@
-name: Get Latest Instructors # test change 4
+name: Get Latest Instructors
 on:
   workflow_dispatch:
   schedule:
