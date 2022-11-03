@@ -26,43 +26,6 @@ fun main(args: Array<String>) {
         return
     }
 
-    // region data-8 generation
-//    val localSource = LocalSource()
-//    val oldEntriesMap = localSource.getAllEntriesInDir<Entry>("json-data/data-S14")
-//    println(oldEntriesMap.size)
-//    localSource.getAllEntriesInDir<Entry>("json-data/data-8")
-//        .addOldEntries(oldEntriesMap)
-//        .mapEachDept { _, _, entries ->
-//            entries.map {
-//                val moddedQs = it.questions?.map { q -> QsMap[q] ?: q }
-//                if(moddedQs == it.questions)
-//                    return@map it
-//                Entry(
-//                    instructor = it.instructor,
-//                    term = it.term,
-//                    code = it.code,
-//                    courseName = it.courseName,
-//                    indexNum = it.indexNum,
-//                    note = it.note,
-//                    enrolled = it.enrolled,
-//                    responses = it.responses,
-//                    scores = it.scores,
-//                    questions = it.questions?.map { q -> QsMap[q] ?: q },
-//                )
-//            }
-//        }.semicolonCleanup()
-//        .writeToDir("json-data/data-9")
-    // endregion
-
-    // region data-9 generation
-//    val localSource = LocalSource()
-//    localSource.getAllEntriesInDir<Entry>("json-data/data-9")
-//        .toEntriesByProfMap()
-//        .mapValues { (_, a) -> a.filterValues { it.isNotEmpty() }.mapValues { (_,b) -> b.toSortedMap().toMap() } }
-//        .writeToDir("json-data/data-9-by-prof")
-//        .forEachDept { s, s2, map -> if(map.isEmpty()) println("$s $s2") }
-    // endregion
-
 //    val entriesMap = LocalSource().getAllEntriesInDir<Entry>("json-data-9")
 //    entriesMap.toEntriesByProfMap().printPossibleNameAdjustments()
 
