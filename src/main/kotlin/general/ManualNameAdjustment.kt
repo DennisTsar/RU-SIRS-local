@@ -776,6 +776,11 @@ fun manualNameAdjustment(prof: String, code: String): String {
             else -> prof
         }
 
+        "08:081" -> when (prof) {
+            "OLESON JEANNIE" -> "OLESON, JEANINE"
+            else -> prof
+        }
+
         else -> prof
     }
 }
