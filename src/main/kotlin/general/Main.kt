@@ -28,17 +28,6 @@ fun main(args: Array<String>) {
 
 //    val entriesMap = LocalSource().getAllEntriesInDir<Entry>("json-data-9")
 //    entriesMap.toEntriesByProfMap().printPossibleNameAdjustments()
-
-//    runBlocking {
-//        val socRes = socSource.getSOCData()
-//            .substringAfterBefore("<div id=\"initJsonData\" style=\"display:none;\">", "</div>")
-//        Json.decodeFromString<SOCData>(socRes)
-//            .subjects.associate { it.code to it.description }
-//            .let {
-//                val file = makeFileAndDir("extra-json-data/deptNameMap.json")
-//                file.writeText(Json.encodeToString(it))
-//            }
-//    }
 }
 
 //To get CSV, pass ::csvFromEntries, to get JSONs, { Json.encodeToString(this) }
