@@ -1,7 +1,7 @@
 package misc
 
-import Entry
 import EntriesMap
+import Entry
 import remote.sources.LocalSource
 
 fun validateMapOfEntries(
@@ -29,13 +29,13 @@ fun compareDataDirs(dir1: String, dir2: String, compareSizes: Boolean = true) {
     val map2 = localSource.getAllEntriesInDir<Entry>(dir2)
 
     // region silliness
-    val compareSchoolsMap: Map<*, Map<*, List<*>>>.(Map<*, *>, String, String) -> Unit =
+    val compareSchoolMap: Map<*, Map<*, List<*>>>.(Map<*, *>, String, String) -> Unit =
         { otherMap, dir, otherDir ->
             filterKeys { it !in otherMap.keys }
                 .takeIf { it.isNotEmpty() }
-                ?.let { schoolsMap ->
+                ?.let { schoolMap ->
                     println("Schools in $dir but not in $otherDir:")
-                    schoolsMap.forEach { (k, v) -> println("$k: ${v.map { "${it.key}=${it.value.size}" }}") }
+                    schoolMap.forEach { (k, v) -> println("$k: ${v.map { "${it.key}=${it.value.size}" }}") }
                 }
         }
     val compareDeptsMap: Map<*, List<*>>.(Map<*, *>, String, String, String) -> Unit =
@@ -49,8 +49,8 @@ fun compareDataDirs(dir1: String, dir2: String, compareSizes: Boolean = true) {
         }
     // endregion
 
-    map1.compareSchoolsMap(map2, dir1, dir2)
-    map2.compareSchoolsMap(map1, dir2, dir1)
+    map1.compareSchoolMap(map2, dir1, dir2)
+    map2.compareSchoolMap(map1, dir2, dir1)
 
     val sharedSchools = map1.keys.filter { it in map2.keys }
 

@@ -5,13 +5,24 @@ import SchoolDeptsMap
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import misc.makeFileAndDir
+import remote.sources.LocalSource
 
-inline fun <reified T> SchoolDeptsMap<T>.writeToDir(dir: String) {
-    forEach { (school, deptMap) ->
-        deptMap.forEach { (dept, entries) ->
-            Json.encodeToString(entries).let {
-                val file = makeFileAndDir("$dir/$school/$dept.json")
-                file.writeText(it)
+inline fun <reified T> SchoolDeptsMap<T>.writeToDir(dir: String, writeSchoolMap: Boolean = true): SchoolDeptsMap<T> {
+    if (writeSchoolMap) {
+        val dirMap = LocalSource().getSchoolMapLocal().mapValues { (code, school) ->
+            school.copy(depts = school.depts.filter { this[code]?.keys?.contains(it) == true }.toSet())
+                .takeIf { it.depts.isNotEmpty() }
+        }.filterValues { it != null }
+        val file = makeFileAndDir("$dir/schoolMap.json")
+        file.writeText(Json.encodeToString(dirMap))
+    }
+    return this.also {
+        forEach { (school, deptMap) ->
+            deptMap.forEach { (dept, entries) ->
+                Json.encodeToString(entries).let {
+                    val file = makeFileAndDir("$dir/$school/$dept.json")
+                    file.writeText(it)
+                }
             }
         }
     }

@@ -14,13 +14,13 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.*
 import kotlinx.serialization.json.Json
-import substringAfterBefore
 import pmap
 import remote.EntriesSource
 import remote.RemoteApi
-import remote.SchoolsMapSource
+import remote.SchoolMapSource
+import substringAfterBefore
 
-class SIRSSource(private val API_KEY: String) : RemoteApi, SchoolsMapSource, EntriesSource {
+class SIRSSource(private val API_KEY: String) : RemoteApi, SchoolMapSource, EntriesSource {
     private val sirsClient = client.config {
         defaultRequest {
             header("Cookie", API_KEY)
@@ -89,7 +89,7 @@ class SIRSSource(private val API_KEY: String) : RemoteApi, SchoolsMapSource, Ent
         }.body()
     }
 
-    suspend fun getSpecificSchoolsMap(semYear: SemYear): Map<String, School> {
+    suspend fun getSpecificSchoolMap(semYear: SemYear): Map<String, School> {
         return getSchoolsOrDepts(semYear).schools.pmap { (code, name) -> // this works as each sublist is always length 2 w/ this format
             val depts = getSchoolsOrDepts(semYear, code).depts.toSet()
             code to School(code, name, depts)
@@ -99,7 +99,7 @@ class SIRSSource(private val API_KEY: String) : RemoteApi, SchoolsMapSource, Ent
     private suspend fun HttpResponse.mapSIRSPageToEntries(): List<Entry> =
         body<String>().split("\t\t<strong>  ").drop(1).map(::Entry)
 
-    suspend fun getSchoolsMapUsingSOC(
+    suspend fun getSchoolMapUsingSOC(
         socSource: SOCSource = SOCSource(),
         semesters: List<SemYear> = DefaultParams.sirsRange,
     ): Map<String, School> {
@@ -125,9 +125,9 @@ class SIRSSource(private val API_KEY: String) : RemoteApi, SchoolsMapSource, Ent
             }.associateBy { it.code }
     }
 
-    suspend fun getCompleteSchoolsMap(semesters: List<SemYear> = DefaultParams.sirsRange): Map<String, School> {
+    suspend fun getCompleteSchoolMap(semesters: List<SemYear> = DefaultParams.sirsRange): Map<String, School> {
         return semesters
-            .pmap { getSpecificSchoolsMap(it) }
+            .pmap { getSpecificSchoolMap(it) }
             .reduce { acc, map ->
                 val newSchools = map.filterKeys { it !in acc.keys }
                 acc.mapValues { (code, school) ->
@@ -145,7 +145,7 @@ class SIRSSource(private val API_KEY: String) : RemoteApi, SchoolsMapSource, Ent
         return semesters.pmap { getEntriesByDeptOrCourse(it, school, dept) }.flatten()
     }
 
-    override suspend fun getSchoolsMap(): Map<String, School> = getSchoolsMapUsingSOC()
+    override suspend fun getSchoolMap(): Map<String, School> = getSchoolMapUsingSOC()
 
     override suspend fun getLatestEntriesInDept(school: String, dept: String): List<Entry> =
         getEntriesOverSems(school, dept)

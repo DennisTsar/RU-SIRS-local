@@ -13,6 +13,7 @@ fun EntriesMap.toEntriesByProfMap(): EntriesByProfMap =
             listOf("do not use", "error", "faculty", "proctortrack", "instructor").any { it in prof.lowercase() }
                     || listOf("", ",", "--", "TA", "(Recitation)").any { it == prof }
                     || prof.likelyMultipleProfs()
+                    || entry.scores.size < 100 // for now
         }.mapByProfs()
     }
 

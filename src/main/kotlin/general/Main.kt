@@ -25,6 +25,44 @@ fun main(args: Array<String>) {
         getInstructors(writeDir = "json-data/extra-data/S23-instructors")
         return
     }
+
+    // region data-8 generation
+//    val localSource = LocalSource()
+//    val oldEntriesMap = localSource.getAllEntriesInDir<Entry>("json-data/data-S14")
+//    println(oldEntriesMap.size)
+//    localSource.getAllEntriesInDir<Entry>("json-data/data-8")
+//        .addOldEntries(oldEntriesMap)
+//        .mapEachDept { _, _, entries ->
+//            entries.map {
+//                val moddedQs = it.questions?.map { q -> QsMap[q] ?: q }
+//                if(moddedQs == it.questions)
+//                    return@map it
+//                Entry(
+//                    instructor = it.instructor,
+//                    term = it.term,
+//                    code = it.code,
+//                    courseName = it.courseName,
+//                    indexNum = it.indexNum,
+//                    note = it.note,
+//                    enrolled = it.enrolled,
+//                    responses = it.responses,
+//                    scores = it.scores,
+//                    questions = it.questions?.map { q -> QsMap[q] ?: q },
+//                )
+//            }
+//        }.semicolonCleanup()
+//        .writeToDir("json-data/data-9")
+    // endregion
+
+    // region data-9 generation
+//    val localSource = LocalSource()
+//    localSource.getAllEntriesInDir<Entry>("json-data/data-9")
+//        .toEntriesByProfMap()
+//        .mapValues { (_, a) -> a.filterValues { it.isNotEmpty() }.mapValues { (_,b) -> b.toSortedMap().toMap() } }
+//        .writeToDir("json-data/data-9-by-prof")
+//        .forEachDept { s, s2, map -> if(map.isEmpty()) println("$s $s2") }
+    // endregion
+
 //    val entriesMap = LocalSource().getAllEntriesInDir<Entry>("json-data-9")
 //    entriesMap.toEntriesByProfMap().printPossibleNameAdjustments()
 
@@ -34,7 +72,7 @@ fun main(args: Array<String>) {
 //        Json.decodeFromString<SOCData>(socRes)
 //            .subjects.associate { it.code to it.description }
 //            .let {
-//                val file = makeFileAndDir("extra-json-data/deptNamesMap.json")
+//                val file = makeFileAndDir("extra-json-data/deptNameMap.json")
 //                file.writeText(Json.encodeToString(it))
 //            }
 //    }
@@ -43,12 +81,12 @@ fun main(args: Array<String>) {
 //To get CSV, pass ::csvFromEntries, to get JSONs, { Json.encodeToString(this) }
 fun parseDeptsFromSIRS(
     entriesSource: EntriesSource,
-    schoolDeptsMap: Map<String, School>,
+    schoolMap: Map<String, School>,
     stringForFile: List<Entry>.() -> String?,
     writeDir: String,
     extraEntries: EntriesMap = emptyMap(),
 ) {
-    runBlocking { entriesSource.getAllLatestEntries(schoolDeptsMap.values) }.addOldEntries(extraEntries)
+    runBlocking { entriesSource.getAllLatestEntries(schoolMap.values) }.addOldEntries(extraEntries)
         .forEach { (school, deptsMap) ->
             deptsMap.forEach dept@{ (dept, entries) ->
                 globalSetOfQs.addAll(entries.flatMap { it.questions ?: emptyList() })
