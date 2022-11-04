@@ -781,6 +781,86 @@ fun manualNameAdjustment(prof: String, code: String): String {
             else -> prof
         }
 
+        "19:910" -> when (prof) {
+            "ALI, MARY", "ALI, BETH" -> "ALI, MARY BETH"
+            "AMANDA, THOMPSON" -> "THOMPSON, AMANDA"
+            "AMANDA, MATHISEN" -> "MATHISEN, AMANDA"
+            "ANGELL, BETH", "ANGELL, B" -> "ANGELL, KATHRYN"
+            "ANTHONY, VIVIEN" -> "ANTHONY, WEN"
+            "BARNETT, C" -> "BARNITT, C"
+            "BERGACS, KATIE" -> "BERGACS, KATHARINE"
+            "BOAINAELLI, L" -> "BOIANELLI, L"
+            "COHEN, EMILY", "GREENFIELD, COHEN" -> "GREENFIELD, EMILY"
+            "COANGELO, B" -> "COLANGELO, BRIAN"
+            "CARL, SIEBERT" -> "SIEBERT, CARL"
+            "DARCY, SIEBERT" -> "SIEBERT, DARCY"
+            "DAVID, BARRY" -> "BARRY, DAVID"
+            "DAVID, A" -> "ERRICKSON, DAVID"
+            "REBECCA, DAVIS" -> "DAVIS, REBECCA"
+            "DEMAIO, KATHY" -> "DEMAIO, KATHLEEN"
+            "DURON, JACKIE" -> "DURON, JACQUELYNN"
+            "FARMER" -> "FARMER, ANTOINETTE" // !! This applies only for Fall 2016 entry !!
+            "FESTA, SANDY" -> "FESTA, SANDRA"
+            "KERENZA, REID" -> "REID, KERENZA"
+            "GAUGHAN, LINDSEY" -> "GAUGHAN, LINDSAY" // probably
+            "CHARLES, GOLDSTEIN" -> "GOLDSTEIN, CHARLES"
+            "ANALEAH, GREEN" -> "GREEN, ANALEAH"
+            "HALEY-LOCK, ANNA", "HALEY-LOCK, A" -> "HALEY, ANNA"
+            "HEATHER, BURROUGHS" -> "BURROUGHS, HEATHER"
+            "MILLS-PEVONIS, HEATHER" -> "MILLS, HEATHER"
+            "HODGON, B" -> "HODGDON, B"
+            "GRETCHEN, HOGE" -> "HOGE, GRETCHEN"
+            "CHIEN-CHUN, HUANG" -> "HUANG, CHIEN-CHUN"
+            "JOO, MICHAEL" -> "JOO, MYUNG-KOOK"
+            "KAZHAROVA-KACZ, O", "KACZMARCYZK, O" -> "KAZHAROVA-KACZMARCZYK, OKSANA"
+            "KIM, JEOUNG-HEE" -> "KIM, JOY"
+            "MANAHAN, MOORE", "MOORE, MANAHAN" -> "MOORE MANAHAN, GERALDINE"
+            "BRANDI, KOHR" -> "KOHR, BRANDI"
+            "LEVENTHAL, JODI", "LEVENTHAL, J" -> "LEVINTHAL, J"
+            "LOMANGINO-DIMA, D", "DIMAURO, D", "LOMANGUNO, D" -> "LOMANGINO-DIMAURO, DAWNE"
+            "LAURA, LUCIANO" -> "LUCIANO, LAURA"
+            "MANDA, GATTO" -> "GATTO, MANDA"
+            "JANINE, MARISCOTTI" -> "MARISCOTTI, JANINE"
+            "COLLEEN, MARTINEZ" -> "MARTINEZ, COLLEEN"
+            "MASON-ANDRES, BEVERLY" -> "MASON, BEVERLY"
+            "MAYERS, SANCHEZ", "MAYERS, RAYMOND", "RAY, SANCHEZ", "SANCHEZ, MAYERS", "SANCHEZ-MAYERS, R" -> "SANCHEZ MAYERS, RAYMOND"
+            "MCMAHON-CANNIZZO, SARAH" -> "MCMAHON, SARAH"
+            "BEMBRY, N" -> "MOORE-BEMBRY, NATALIE"
+            "CEDENO-MORRIS, NANCY" -> "MORRIS, NANCY"
+            "NATHAN, RANDY" -> "NATHAN, RANDALL"
+            "STAMM, RANDY", "RANDALL, STAMM" -> "STAMM, RANDALL"
+            "NICELY-COLANGE, K", "COLANGELO, K" -> "NICELY-COLANGELO, KRISTIN"
+            "NICOLE, MORELLA" -> "MORELLA, NICOLE"
+            "PATTERSON, SESSOMES", "SESSIMONE-PATT, D" -> "PATTERSON-SESSOMES, D"
+            "PETERSON, A" -> "PETERSON, NELSON"
+            "PHILLIPS, JACQUELINE", "PHILLIPS, JACKIE" -> "PHILLIPS, JACQULINE"
+            "JOYCE, PRIOR" -> "PRIOR, JOYCE"
+            "RAMOS, B", "RAMOS, BIANCA" -> "CHANNER, BIANCA"
+            "RINALDI, CHERYL" -> "TORRES, CHERYL" // probably
+            "ROBLES, GABRIEL", "ROBLES, ALBERTO" -> "ROBLES ALBERTO, GABRIEL"
+            "RONALD, QUINCY" -> "QUINCY, RONALD"
+            "DONALD, STAGER" -> "STAGER, DONALD"
+            "SADHWANI-MONCH, D", "SANHWANI, D" -> "SADHWANI-MONCHAK, DEEPA"
+            "SALERNO, E" -> "SALERNO, L" // probably same person, idk who
+            "LA'TESHA, SAMPSON" -> "SAMPSON, LATESHA"
+            "NANCY, SCHLEY" -> "SCHLEY, NANCY"
+            "RACHEL, SCHWARTZ" -> "SCHWARTZ, RACHEL"
+            "SCOTTO-ROSATO, NANCY", "SCOTTO, NANCY" -> "SCOTTO-ROSATO, NUNZIA" // strong maybe
+            "SHRIVRIDHI, SHUKLA" -> "SHUKLA, SHRIVRIDHI"
+            "KARUN, SINGH" -> "SINGH, KARUN"
+            "SMITH, D" -> "SMITH, DANIEL" // !! only for F16-F17 !!
+            "SMITH, J", "SMITH, MELISSA", "LISA, SMITH" -> "SMITH, LISA" // both maybe; also 1st might be "SINHA, J"
+            "SONIA, BROWN" -> "BROWN, SONIA"
+            "GERI, SUMMERS" -> "SUMMERS, GERI"
+            "WALDMAN, B" -> "WALDMAN, WILLIAM"
+            "WHITFIELD-SPIN, L", "WHITFELD-SPINN, L", "WHITTFIELD-SPINNER, L" -> "WHITFIELD-SPINNER, LINDA"
+            "WILKENFIELD, B" -> "WILKENFELD, BONNIE"
+            "CHRISTINE, JAMES" -> "JAMES, CHRISTINE" // probably
+            "DELUCA, LITKEY", "DELUCCA-LITKEY, A" -> "DELUCA-LITKEY, AMY"
+            "VANALST, D" -> "VAN ALST, D"
+            else -> prof
+        }
+
         else -> prof
     }
 }
