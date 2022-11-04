@@ -11,7 +11,7 @@ fun EntriesMap.toEntriesByProfMap(): EntriesByProfMap =
         entries.filterNot { entry ->
             val prof = entry.instructor
             listOf("do not use", "error", "faculty", "proctortrack", "instructor").any { it in prof.lowercase() }
-                    || listOf("", ",", "--", "TA", "(Recitation)").any { it == prof }
+                    || listOf("", ",", "-", "--", "TA", "(Recitation)").any { it == prof }
                     || prof.likelyMultipleProfs()
                     || entry.scores.size < 100 // for now
         }.mapByProfs()
