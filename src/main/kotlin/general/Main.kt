@@ -17,17 +17,32 @@ import remote.EntriesSource
 import remote.sources.LocalSource
 import remote.sources.SIRSSource
 import remote.sources.SOCSource
+import java.io.File
 
 val globalSetOfQs = mutableSetOf<String>()
 
 fun main(args: Array<String>) {
-    if (args.firstOrNull() == "-instructor") {
+    if ("-instructor" in args) {
         getInstructors(writeDir = "json-data/extra-data/S23-instructors")
-        return
     }
+    if ("-updateByProf" in args) {
+        generateInstructorsByProf(9)
+    }
+}
 
-//    val entriesMap = LocalSource().getAllEntriesInDir<Entry>("json-data-9")
-//    entriesMap.toEntriesByProfMap().printPossibleNameAdjustments()
+fun generateInstructorsByProf(folderNum: Int){
+    if(!File("json-data/data-$folderNum-by-prof").deleteRecursively())
+        throw Exception("Failed to delete json-data/data-$folderNum-by-prof")
+    val localSource = LocalSource()
+    val schoolMap = localSource.getSchoolMapLocal()
+    localSource.getAllEntriesInDir<Entry>("json-data/data-$folderNum")
+        .toEntriesByProfMap()
+        .filterKeys { it in schoolMap.keys }
+        .mapValues { (school, a) ->
+            a.filterKeys { schoolMap[school]?.depts?.contains(it) == true }
+                .filterValues { it.isNotEmpty() }
+                .mapValues { (_,b) -> b.toSortedMap().toMap() }
+        }.writeToDir("json-data/data-$folderNum-by-prof")
 }
 
 //To get CSV, pass ::csvFromEntries, to get JSONs, { Json.encodeToString(this) }
