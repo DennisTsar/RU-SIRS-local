@@ -2,10 +2,10 @@ package remote.sources
 
 import Entry
 import School
+import SemYear
+import Semester
 import data.sirs_courseFilter.SIRSCourseFilterResult
 import general.DefaultParams
-import general.SemYear
-import general.Semester
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*

@@ -4,6 +4,7 @@ import EntriesByProfMap
 import EntriesMap
 import Entry
 import School
+import SemYear
 import forEachDept
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
