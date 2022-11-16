@@ -3,7 +3,6 @@ package general
 import SemYear
 import Semester
 
-//@Suppress("MemberVisibilityCanBePrivate")
 object DefaultParams {
     val semYear = SemYear(Semester.Spring, 2023)
     val campus = Campus.NB
