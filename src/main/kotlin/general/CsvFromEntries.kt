@@ -9,7 +9,7 @@ fun List<Entry>.toCsv(): String? {
     val profRatings = mapByProfs()
         .filterValues { it.isNotEmpty() }
         .mapValues { (_, entries) ->
-            entries.getTotalRatings().getRatingStats()[8] // This is the teaching effectiveness question
+            entries.getTotalRatings()[8].getRatingStats() // This is the teaching effectiveness question
         }.toList() // turning into list so it can be sorted
         .takeIf { it.isNotEmpty() } ?: return null // Not sure if this is needed
 
