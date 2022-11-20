@@ -4,7 +4,7 @@ import EntriesByProfMap
 import EntriesMap
 import Entry
 import School
-import SemYear
+import Semester
 import forEachDept
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
@@ -31,8 +31,8 @@ fun main(args: Array<String>) {
     }
 }
 
-fun generateInstructorsByProf(folderNum: Int){
-    if(!File("json-data/data-$folderNum-by-prof").deleteRecursively())
+fun generateInstructorsByProf(folderNum: Int) {
+    if (!File("json-data/data-$folderNum-by-prof").deleteRecursively())
         throw Exception("Failed to delete json-data/data-$folderNum-by-prof")
     val localSource = LocalSource()
     val schoolMap = localSource.getSchoolMapLocal()
@@ -42,7 +42,7 @@ fun generateInstructorsByProf(folderNum: Int){
         .mapValues { (school, a) ->
             a.filterKeys { schoolMap[school]?.depts?.contains(it) == true }
                 .filterValues { it.isNotEmpty() }
-                .mapValues { (_,b) -> b.toSortedMap().toMap() }
+                .mapValues { (_, b) -> b.toSortedMap().toMap() }
         }.writeToDir("json-data/data-$folderNum-by-prof")
 }
 
@@ -88,7 +88,7 @@ fun parseEntriesFromSIRS(
     schoolDeptsMap: Map<String, School>,
     stringForFile: List<Entry>.() -> String?,
     writeDir: String,
-    semesters: List<SemYear> = DefaultParams.sirsRange,
+    semesters: List<Semester> = DefaultParams.sirsRange,
     extraEntries: EntriesMap = emptyMap(), // for old entries no longer in SIRS
 ) {
     schoolDeptsMap.forEach { (school, value) ->
@@ -114,14 +114,14 @@ fun parseEntriesFromSIRS(
 
 fun getInstructors(
     socSource: SOCSource = SOCSource(),
-    semYear: SemYear = DefaultParams.semYear,
+    semester: Semester = DefaultParams.semester,
     campuses: List<Campus> = Campus.values().toList(),
     writeDir: String? = null, // if null, don't write to file
 ): Map<String, List<String>> {
     return runBlocking {
         val entries = LocalSource().getAllEntriesByProfInDir().mapEachDept { _, _, map -> map.keys }
 
-        val courseToProfs = campuses.flatMap { socSource.getCourses(semYear, it) }
+        val courseToProfs = campuses.flatMap { socSource.getCourses(semester, it) }
             .groupBy(
                 keySelector = { it.courseString },
                 valueTransform = { courseListing ->

@@ -2,7 +2,6 @@ package remote.sources
 
 import Entry
 import School
-import SemYear
 import Semester
 import data.sirs_courseFilter.SIRSCourseFilterResult
 import general.DefaultParams
@@ -29,14 +28,14 @@ class SIRSSource(private val API_KEY: String) : RemoteApi, SchoolMapSource, Entr
     }
 
     suspend fun getEntriesByDeptOrCourse(
-        semYear: SemYear,
+        semester: Semester,
         school: String,
         dept: String,
         course: String? = null,
     ): List<Entry> {
         return sirsClient.get("/index.php") {
-            parameter("survey[semester]", semYear.semester)
-            parameter("survey[year]", semYear.year)
+            parameter("survey[semester]", semester.type)
+            parameter("survey[year]", semester.year)
             parameter("survey[school]", school)
             parameter("survey[dept]", dept)
             parameter("survey[course]", course)
@@ -47,14 +46,13 @@ class SIRSSource(private val API_KEY: String) : RemoteApi, SchoolMapSource, Entr
     suspend fun getByLastName(
         lastname: String,
         semester: Semester? = null,
-        year: Int? = null,
         school: String? = null,
         dept: String? = null,
     ): List<List<String>> {
         return sirsClient.get("/index.php") {
             parameter("survey[lastname]", lastname)
-            parameter("survey[semester]", semester)
-            parameter("survey[year]", year)
+            parameter("survey[semester]", semester?.type)
+            parameter("survey[year]", semester?.year)
             parameter("survey[school]", school)
             parameter("survey[dept]", dept)
             parameter("mode", "name")
@@ -74,7 +72,7 @@ class SIRSSource(private val API_KEY: String) : RemoteApi, SchoolMapSource, Entr
     }
 
     suspend fun getSchoolsOrDepts(
-        semYear: SemYear = DefaultParams.lastSirsSem,
+        semester: Semester = DefaultParams.lastSirsSem,
         school: String = "",
     ): SIRSCourseFilterResult {
         return sirsClient.config {
@@ -82,16 +80,16 @@ class SIRSSource(private val API_KEY: String) : RemoteApi, SchoolMapSource, Entr
                 serialization(ContentType.Text.Html, Json)
             }
         }.get("/courseFilter.php") {
-            parameter("survey[semester]", semYear.semester)
-            parameter("survey[year]", semYear.year)
+            parameter("survey[semester]", semester.type)
+            parameter("survey[year]", semester.year)
             parameter("survey[school]", school)
 //            parameter("mode", "course") // sent by default but doesn't do anything?
         }.body()
     }
 
-    suspend fun getSpecificSchoolMap(semYear: SemYear): Map<String, School> {
-        return getSchoolsOrDepts(semYear).schools.pmap { (code, name) -> // this works as each sublist is always length 2 w/ this format
-            val depts = getSchoolsOrDepts(semYear, code).depts.toSet()
+    suspend fun getSpecificSchoolMap(semester: Semester): Map<String, School> {
+        return getSchoolsOrDepts(semester).schools.pmap { (code, name) -> // this works as each sublist is always length 2 w/ this format
+            val depts = getSchoolsOrDepts(semester, code).depts.toSet()
             code to School(code, name, depts)
         }.toMap()
     }
@@ -101,7 +99,7 @@ class SIRSSource(private val API_KEY: String) : RemoteApi, SchoolMapSource, Entr
 
     suspend fun getSchoolMapUsingSOC(
         socSource: SOCSource = SOCSource(),
-        semesters: List<SemYear> = DefaultParams.sirsRange,
+        semesters: List<Semester> = DefaultParams.sirsRange,
     ): Map<String, School> {
         val sirsRes = getSchoolsOrDepts(semesters.last()) // schools not here don't get counted
         // codes of schools with non-empty names
@@ -111,7 +109,7 @@ class SIRSSource(private val API_KEY: String) : RemoteApi, SchoolMapSource, Entr
             .filter { it.code in sirsSchools }
             .pmap { school ->
                 val depts = semesters.flatMap {
-                    getSchoolsOrDepts(SemYear(it.semester, it.year), school.code).depts
+                    getSchoolsOrDepts(Semester(it.type, it.year), school.code).depts
                 }.filter { it.isNotEmpty() }.toSortedSet()
 
                 School(
@@ -125,7 +123,7 @@ class SIRSSource(private val API_KEY: String) : RemoteApi, SchoolMapSource, Entr
             }.associateBy { it.code }
     }
 
-    suspend fun getCompleteSchoolMap(semesters: List<SemYear> = DefaultParams.sirsRange): Map<String, School> {
+    suspend fun getCompleteSchoolMap(semesters: List<Semester> = DefaultParams.sirsRange): Map<String, School> {
         return semesters
             .pmap { getSpecificSchoolMap(it) }
             .reduce { acc, map ->
@@ -140,7 +138,7 @@ class SIRSSource(private val API_KEY: String) : RemoteApi, SchoolMapSource, Entr
     suspend fun getEntriesOverSems(
         school: String,
         dept: String,
-        semesters: List<SemYear> = DefaultParams.sirsRange,
+        semesters: List<Semester> = DefaultParams.sirsRange,
     ): List<Entry> {
         return semesters.pmap { getEntriesByDeptOrCourse(it, school, dept) }.flatten()
     }

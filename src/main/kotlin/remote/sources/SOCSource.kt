@@ -1,6 +1,6 @@
 package remote.sources
 
-import SemYear
+import Semester
 import data.soc.Course
 import data.soc.SOCData
 import general.Campus
@@ -19,7 +19,7 @@ private const val SOC_BASE_URL = "https://sis.rutgers.edu/soc"
 
 class SOCSource : RemoteApi {
     suspend fun getCourses(
-        semYear: SemYear = DefaultParams.semYear,
+        semester: Semester = DefaultParams.semester,
         campus: Campus = DefaultParams.campus,
     ): List<Course> {
         return client.config {
@@ -30,8 +30,8 @@ class SOCSource : RemoteApi {
                 json()
             }
         }.get("$SOC_BASE_URL/api/courses.json") {
-            parameter("term", semYear.semester.num)
-            parameter("year", semYear.year)
+            parameter("term", semester.type.num)
+            parameter("year", semester.year)
             parameter("campus", campus)
         }.body()
     }
