@@ -3,6 +3,7 @@ package remote.sources
 import EntriesByProf
 import EntriesByProfMap
 import Entry
+import Instructor
 import School
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -51,15 +52,21 @@ class LocalSource(
 
     override suspend fun getSchoolMap(): Map<String, School> = getSchoolMapLocal()
 
-    fun getInstructorsLocal(term: String): Map<String, List<String>> =
+    fun getLatestInstructorsLocal(term: String): Map<String, List<String>> =
         Json.decodeFromString(File("$extraJsonDir/$term-instructors.json").readText())
 
-    override suspend fun getInstructors(term: String): Map<String, List<String>> = getInstructorsLocal(term)
+    override suspend fun getLatestInstructors(term: String): Map<String, List<String>> =
+        getLatestInstructorsLocal(term)
 
     fun getDeptMapLocal(): Map<String, String> =
         Json.decodeFromString(File("$extraJsonDir/deptNameMap.json").readText())
 
     override suspend fun getDeptMap(): Map<String, String> = getDeptMapLocal()
+
+    fun getAllInstructorsLocal(): List<Instructor> =
+        Json.decodeFromString(File("$extraJsonDir/allInstructors.json").readText())
+
+    override suspend fun getAllInstructors(): List<Instructor> = getAllInstructorsLocal()
 
     fun getDirSchoolMapLocal(dataDir: String): Map<String, School> =
         Json.decodeFromString(File("json-data/$dataDir/schoolMap.json").readText())

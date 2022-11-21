@@ -3,7 +3,7 @@ package general
 import EntriesByProfMap
 import EntriesMap
 import Entry
-import Prof
+import Instructor
 import School
 import Semester
 import flatMapEachDept
@@ -33,11 +33,11 @@ fun main(args: Array<String>) {
     }
 }
 
-fun getProfList(writeDir: String? = null): List<Prof> {
+fun getProfList(writeDir: String? = null): List<Instructor> {
     val profList = LocalSource().getAllEntriesByProfInDir()
         .flatMapEachDept { school, dept, entriesByProf ->
-            entriesByProf.map { (prof, entries) ->
-                Prof(prof, school, dept, entries.last().semester)
+            entriesByProf.map { (name, entries) ->
+                Instructor(name, school, dept, entries.last().semester)
             }
         }.sortedBy { it.name }
     writeDir?.let {
