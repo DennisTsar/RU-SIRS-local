@@ -3,8 +3,10 @@ package general
 import EntriesByProfMap
 import EntriesMap
 import Entry
+import Prof
 import School
 import Semester
+import flatMapEachDept
 import forEachDept
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
@@ -29,6 +31,20 @@ fun main(args: Array<String>) {
     if ("-updateByProf" in args) {
         generateInstructorsByProf(9)
     }
+}
+
+fun getProfList(writeDir: String? = null): List<Prof> {
+    val profList = LocalSource().getAllEntriesByProfInDir()
+        .flatMapEachDept { school, dept, entriesByProf ->
+            entriesByProf.map { (prof, entries) ->
+                Prof(prof, school, dept, entries.last().semester)
+            }
+        }.sortedBy { it.name }
+    writeDir?.let {
+        val file = makeFileAndDir("$it/allInstructors.json")
+        file.writeText(Json.encodeToString(profList))
+    }
+    return profList
 }
 
 fun generateInstructorsByProf(folderNum: Int) {
