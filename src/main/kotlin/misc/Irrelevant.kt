@@ -8,7 +8,7 @@ fun validateMapOfEntries(
     map1: EntriesMap = LocalSource().getAllEntriesInDir(),
     map2: EntriesMap,
 ) {
-    map1.forEach { (k, v) ->
+    map1.forEach { (k, _) ->
         val p = map2.getOrElse(k) {
             println("error: $k")
             return@forEach
