@@ -6,6 +6,9 @@ import EntriesMap
 import Entry
 import mapEachDept
 
+private val forwardSpecialNameParts = setOf("DER", "DE", "DA", "DEL", "LA", "UZ", "EL", "VAN", "MC")
+private val backwardSpecialNameParts = forwardSpecialNameParts + setOf("II", "III", "IV", "COL")
+
 fun EntriesMap.toEntriesByProfMap(): EntriesByProfMap =
     mapEachDept { _, _, entries ->
         entries.filterNot { entry ->
@@ -18,14 +21,12 @@ fun EntriesMap.toEntriesByProfMap(): EntriesByProfMap =
     }
 
 private fun String.likelyMultipleProfs(): Boolean {
-    val listOfAccepted = setOf(
-        "der", "de", "da", "del", "la", "uz", "el", "van",  // also used in formatFullName() (forwards + backwards)
-        "ii", "iii", "iv", "col", // also used in formatFullName() (only backwards)
-        "ed.d.", "ezzat", "dagracia", "desilva", "sai", "rui", "graca", "mai", "n", "fache"
+    val listOfAccepted = backwardSpecialNameParts + setOf(
+        "ED.D.", "EZZAT", "DAGRACIA", "DESILVA", "SAI", "RUI", "GRACA", "MAI", "N", "FACHE"
     )
     val altered = replace(" \\(.*\\)|-".toRegex(), "") // replace content in parentheses & removes dashes
         .replace("&quot;", "\"")
-        .lowercase()
+        .uppercase()
 
     val filtered = altered.split(" ", ",").filter { it.isNotBlank() } - listOfAccepted
     return ";" in altered || filtered.size > 3
@@ -35,7 +36,7 @@ fun List<Entry>.mapByProfs(): EntriesByProf {
     val adjustedNames = autoNameAdjustments()
 
     return groupBy { entry ->
-        entry.formatFullName().let { adjustedNames.getOrDefault(it, it) }
+        entry.formatFullName().let { adjustedNames[it] ?: it }
     }
 }
 
@@ -62,9 +63,7 @@ private fun List<Entry>.autoNameAdjustments(): Map<String, String> {
     val names = map { it.formatFullName() }
 
     val specialChars = listOf('-', '\'')
-    val removeSpecialChars: String.() -> String = {
-        specialChars.fold(this) { acc, char -> acc.filter { it != char } }
-    }
+    val removeSpecialChars: String.() -> String = { filterNot { it in specialChars } }
 
     val specialCharMap = names.filter { name -> specialChars.any { it in name } }
         .associateBy { it.removeSpecialChars() }
@@ -77,19 +76,19 @@ private fun List<Entry>.autoNameAdjustments(): Map<String, String> {
             valueTransform = { it.substringAfter(", ", "") },
         ).flatMap { (lastName, commonLast) ->
             val byFirstInitial = commonLast
-                .minus("") // remove string with only last name
-                .groupBy { it[0].toString() } // group by 1st initial - since some entries only have 1st initial
+                .minus("") // remove string that only had last name
+                .groupBy { it[0] } // group by 1st initial - since some entries only have 1st initial
 
             byFirstInitial.flatMap { (initial, commonInitial) ->
                 val fullFirsts = commonInitial
-                    .minus(initial) // remove string with only initial
+                    .minus(initial.toString()) // remove string with only initial
                     .sortedBy { it.length } // sorted to check if shortest name matches longer & to use the longest name
                     .takeIf { it.isNotEmpty() } // when only initial is present -> need to differentiate from false
-                // treat names like "Ron/Ronald", "Ken/Kenneth", ... as same name
+                // treat names like "Ron/Ronald", "Ken/Kenneth", etc. as same name
                 when (fullFirsts?.all { it.startsWith(fullFirsts[0]) }) {
                     true -> commonInitial.associateWith { fullFirsts.last() }
                     false -> emptyMap()
-                    null -> initial.associateWith { it } // so that  run{} below adds last name to map
+                    null -> mapOf(initial to initial) // so that run{} below adds last name to map
                 }.map { "$lastName, ${it.key}" to "$lastName, ${it.value}" }
             }.let {
                 if (byFirstInitial.size == 1 && it.isNotEmpty())
@@ -113,11 +112,9 @@ private fun Entry.formatFullName(): String {
         .let { split ->
             // un-separate the specials from other parts of the name
             // first combine them forwards, then backwards
-            val forwards = setOf("DER", "DE", "DA", "DEL", "LA", "UZ", "EL", "VAN", "MC")
-            val backwards = forwards + setOf("II", "III", "IV", "COL")
             split.fold(emptyList<String>()) { acc, s ->
                 acc.lastOrNull()
-                    ?.takeIf { it.substringAfterLast(" ") in forwards }
+                    ?.takeIf { it.substringAfterLast(" ") in forwardSpecialNameParts }
                     ?.let {
                         // fixes extra space added in some names like "MC CORMICK"
                         val charBetween = if (it.substringAfterLast(" ") == "MC") "" else " "
@@ -125,7 +122,7 @@ private fun Entry.formatFullName(): String {
                     } ?: (acc + s)
             }.foldRight(emptyList<String>()) { s, acc ->
                 acc.firstOrNull()
-                    ?.takeIf { it.substringBefore(" ") in backwards }
+                    ?.takeIf { it.substringBefore(" ") in backwardSpecialNameParts }
                     ?.let { listOf("$s $it") + acc.drop(1) }
                     ?: (listOf(s) + acc)
             }
