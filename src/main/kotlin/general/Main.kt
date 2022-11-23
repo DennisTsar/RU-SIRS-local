@@ -30,6 +30,7 @@ fun main(args: Array<String>) {
     }
     if ("-updateByProf" in args) {
         generateEntriesByProfMap(9)
+        getProfList("json-data/extra-data")
     }
 }
 
