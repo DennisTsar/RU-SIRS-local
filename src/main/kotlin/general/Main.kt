@@ -12,7 +12,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import mapEachDept
-import misc.firstIfLone
 import misc.makeFileAndDir
 import misc.similarity
 import pmap
@@ -161,9 +160,9 @@ fun getInstructors(
                         if (" " in this && "," !in this) replace(" ", ", ")
                         else this
                     }
-                    existingNames.filter { it.startsWith(name) }.firstIfLone()
-                        ?: existingNames.filter { it == name.take(name.indexOf(",") + 3) }.firstIfLone()
-                        ?: existingNames.filter { it.startsWith(name.substringBefore(",")) }.firstIfLone()
+                    existingNames.singleOrNull { it.startsWith(name) }
+                        ?: existingNames.singleOrNull { it == name.take(name.indexOf(",") + 3) }
+                        ?: existingNames.singleOrNull { it.startsWith(name.substringBefore(",")) }
                 }.sorted()
             }.filterValues { it.isNotEmpty() }
             .also { println("${it.size} courses with profs, ${it.count { (_, v) -> v.size > 1 }} with 2+ profs") }
