@@ -29,7 +29,7 @@ fun main(args: Array<String>) {
         getInstructors(writeDir = "json-data/extra-data/S23-instructors")
     }
     if ("-updateByProf" in args) {
-        generateInstructorsByProf(9)
+        generateEntriesByProfMap(9)
     }
 }
 
@@ -47,19 +47,24 @@ fun getProfList(writeDir: String? = null): List<Instructor> {
     return profList
 }
 
-fun generateInstructorsByProf(folderNum: Int) {
+fun generateEntriesByProfMap(folderNum: Int, writeToDir: Boolean = true): EntriesByProfMap {
     if (!File("json-data/data-$folderNum-by-prof").deleteRecursively())
         throw Exception("Failed to delete json-data/data-$folderNum-by-prof")
     val localSource = LocalSource()
     val schoolMap = localSource.getSchoolMapLocal()
-    localSource.getAllEntriesInDir<Entry>("json-data/data-$folderNum")
+    return localSource.getAllEntriesInDir<Entry>("json-data/data-$folderNum")
         .toEntriesByProfMap()
         .filterKeys { it in schoolMap.keys }
-        .mapValues { (school, a) ->
-            a.filterKeys { schoolMap[school]?.depts?.contains(it) == true }
-                .filterValues { it.isNotEmpty() }
-                .mapValues { (_, b) -> b.toSortedMap().toMap() }
-        }.writeToDir("json-data/data-$folderNum-by-prof")
+        .mapValues { (school, entries) ->
+            entries
+                .filter { (dept, entriesByProf) ->
+                    schoolMap[school]?.depts?.contains(dept) == true && entriesByProf.isNotEmpty()
+                }.mapValues { (_, entriesByProf) ->
+                    entriesByProf
+                        .mapValues { (_, entries) -> entries.sortedBy { it.semester } }
+                        .toSortedMap().toMap()
+                }
+        }.also { if (writeToDir) it.writeToDir("json-data/data-$folderNum-by-prof") }
 }
 
 //To get CSV, pass ::csvFromEntries, to get JSONs, { Json.encodeToString(this) }

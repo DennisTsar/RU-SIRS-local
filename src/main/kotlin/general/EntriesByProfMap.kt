@@ -108,23 +108,29 @@ private fun Entry.formatFullName(): String {
     return instructor
         .trim()
         .replace(" \\(.*\\)|,|\\.".toRegex(), "") // removes stuff in parentheses + removes commas & periods
+        .uppercase()
         .split(" ")
         .let { split ->
             // un-separate the specials from other parts of the name
             // first combine them forwards, then backwards
-            val forwards = setOf("der", "de", "da", "del", "la", "uz", "el", "van")
-            val backwards = forwards + setOf("ii", "iii", "iv", "col")
+            val forwards = setOf("DER", "DE", "DA", "DEL", "LA", "UZ", "EL", "VAN", "MC")
+            val backwards = forwards + setOf("II", "III", "IV", "COL")
             split.fold(emptyList<String>()) { acc, s ->
                 acc.lastOrNull()
-                    ?.takeIf { it.split(" ").last().lowercase() in forwards }
-                    ?.let { acc.dropLast(1) + "$it $s" } ?: (acc + s)
+                    ?.takeIf { it.substringAfterLast(" ") in forwards }
+                    ?.let {
+                        // fixes extra space added in some names like "MC CORMICK"
+                        val charBetween = if (it.substringAfterLast(" ") == "MC") "" else " "
+                        acc.dropLast(1) + "$it$charBetween$s"
+                    } ?: (acc + s)
             }.foldRight(emptyList<String>()) { s, acc ->
                 acc.firstOrNull()
-                    ?.takeIf { it.split(" ").first().lowercase() in backwards }
-                    ?.let { listOf("$s $it") + acc.drop(1) } ?: (listOf(s) + acc)
+                    ?.takeIf { it.substringBefore(" ") in backwards }
+                    ?.let { listOf("$s $it") + acc.drop(1) }
+                    ?: (listOf(s) + acc)
             }
         }.let { parts ->
-            parts[0] + (parts.getOrNull(1)?.let { ", $it" } ?: "") // Adds first initial if present
-        }.uppercase()
-        .let { manualNameAdjustment(it, code) }
+            val name = parts[0] + (parts.getOrNull(1)?.let { ", $it" } ?: "") // Adds first initial if present
+            manualNameAdjustment(name, code)
+        }
 }
