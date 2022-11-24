@@ -397,7 +397,6 @@ fun manualNameAdjustment(prof: String, code: String): String {
             "FLEMING, NATUSKO", "FLEMING, NATSUKO" -> "BUURSTRA, NATSUKO" // got married seemingly
             "OKADA-HAWALKA, YASUKO" -> "HAWALKA, YASUKO"
             "PIOTROWSKI, MIKKO", "PIOTROWSKI, A" -> "PIOTROWSKI, MIKIKO" // 2nd probably
-            "S, MAYNARD" -> "MAYNARD, SENKO"
             else -> prof
         }
 
@@ -421,7 +420,6 @@ fun manualNameAdjustment(prof: String, code: String): String {
 
         "01:595" -> when (prof) {
             "ALONSO, BEJARANO" -> "ALONSO, CAROLINA" // 01:050
-            "C, FERNANDEZ" -> "FERNANDEZ, CARLOS"
             "DINZEY-FLORES, ZAIRE", "DINZEY-FLORES, Z", "DINZEY-FLORES" -> "DINZEY, ZAIRE" // 01:920
             "DUCHESNE" -> "DUCHESNE-SOTOMAYOR, DAFNE"
             "FIGUEROA, YOIMARA" -> "FIGUEROA, YOMAIRA"
@@ -533,7 +531,6 @@ fun manualNameAdjustment(prof: String, code: String): String {
             "ROSSI, MIKE" -> "ROSSI, MICHAEL"
             "SOCHA, BAILEY" -> "EAISE, BAILEY" // married I think
             "TERENCE, TEO" -> "TEO, TERENCE"
-            "X, HUANG" -> "HUANG, XIAN"
             else -> prof
         }
 
@@ -597,7 +594,6 @@ fun manualNameAdjustment(prof: String, code: String): String {
             "DEOKI, SHARMA" -> "SHARMA, DEOKI"
             "DONG, HK" -> "DONG, HEI-KI"
             "GEORGE, POPEL" -> "POPEL, GEORGE"
-            "J, KLINCEWICZ" -> "KLINCEWICZ, JOHN"
             "JOE, NAUS", "NAUS, JOSEPH" -> "NAUS, JOE"
             "LMIELINSKI, T" -> "IMIELINSKI, TOMASZ" // 01:198
             "LUO, TIANHOA" -> "LUO, TIANHAO"
@@ -606,10 +602,8 @@ fun manualNameAdjustment(prof: String, code: String): String {
             "MICHAEL, MINIER" -> "MINIERE, MICHAEL"
             "NILSEN, MILLER" -> "MILLER, NILSEN"
             "ROJAS, PATRICK" -> "ROJAS, PATRICIO"
-            "S, SRINIVASAN" -> "SRINIVASAN, SURYAKALA"
             "SHEILA, LAWRENC", "S, LAWRENCE" -> "LAWRENCE, SHEILA"
             "SHYAM, MOONDRA" -> "MOONDRA, SHYAM"
-            "W, STRAWDERMAN" -> "STRAWDERMAN, WILLIAM"
             "ZHANYUN, ZHAO" -> "ZHAO, ZHANYUN"
             else -> prof
         }

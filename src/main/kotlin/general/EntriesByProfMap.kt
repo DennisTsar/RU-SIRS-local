@@ -6,7 +6,8 @@ import EntriesMap
 import Entry
 import mapEachDept
 
-private val forwardSpecialNameParts = setOf("DER", "DE", "DA", "DEL", "LA", "UZ", "EL", "VAN", "MC")
+private val extraSpaceNameParts = setOf("MC", "O'")
+private val forwardSpecialNameParts = extraSpaceNameParts + setOf("DER", "DE", "DA", "DEL", "LA", "UZ", "EL", "VAN")
 private val backwardSpecialNameParts = forwardSpecialNameParts + setOf("II", "III", "IV", "COL")
 
 fun EntriesMap.toEntriesByProfMap(): EntriesByProfMap =
@@ -63,14 +64,23 @@ private fun List<Entry>.autoNameAdjustments(): Map<String, String> {
     val names = map { it.formatFullName() }
 
     val specialChars = listOf('-', '\'')
-    val removeSpecialChars: String.() -> String = { filterNot { it in specialChars } }
+    fun String.removeSpecialChars(): String = filterNot { it in specialChars }
 
     val specialCharMap = names.filter { name -> specialChars.any { it in name } }
         .associateBy { it.removeSpecialChars() }
 
-    val nameMappings = names
-        .map { it.removeSpecialChars() }
-        .distinct()
+    val namesInitiallyParsed = names.map { it.removeSpecialChars() }.toSet()
+
+    // assume that all names where last name is only one letter must have been flipped
+    // i.e. "J, SMITH" is actually "SMITH, J"
+    // so we add "SMITH, J" to the list of names and keep track of it, so we can later map it back as "J, SMITH"
+    val (flippedNames, properNames) = namesInitiallyParsed.partition {
+        it.substringBefore(", ", "").length == 1
+    }
+    fun String.flipName(): String = split(", ").reversed().joinToString(", ")
+    val fixedNames = flippedNames.map { it.flipName() }
+
+    val nameMappings = properNames.plus(fixedNames).toSet()
         .groupBy(
             keySelector = { it.substringBefore(",") },
             valueTransform = { it.substringAfter(", ", "") },
@@ -88,19 +98,24 @@ private fun List<Entry>.autoNameAdjustments(): Map<String, String> {
                 when (fullFirsts?.all { it.startsWith(fullFirsts[0]) }) {
                     true -> commonInitial.associateWith { fullFirsts.last() }
                     false -> emptyMap()
-                    null -> mapOf(initial to initial) // so that run{} below adds last name to map
+                    null -> mapOf(initial to initial) // so that let {} below adds last name to map
                 }.map { "$lastName, ${it.key}" to "$lastName, ${it.value}" }
             }.let {
                 if (byFirstInitial.size == 1 && it.isNotEmpty())
                     it.plus(lastName to it[0].second) // pair "Smith" with first name if only one exists
                 else it
-            }.flatMap { (key, value) ->
-                val newSecond = specialCharMap[value] ?: value // use name with dashes if it exists
-                val specialPair = specialCharMap[key]?.let { it to newSecond } // duplicate normal pair for special name
-                listOfNotNull(key to newSecond, specialPair)
             }
-        }.toMap()
-    return specialCharMap + nameMappings // not that this order is important as keys from first are overwritten
+        }.flatMap { (originalKey, value) ->
+            val newValue = specialCharMap[value] ?: value // use name with dashes if it exists
+            // for both normal and (potentially) flipped name, map key and special char version of key to newValue
+            // i.e. "Smith, J" and "J, Smith" both map to "Smith, John"
+            // main point is we need to modify existing map, plus add special case maps
+            listOfNotNull(originalKey, originalKey.takeIf { it in fixedNames }?.flipName())
+                .flatMap { key ->
+                    listOfNotNull(key to newValue, specialCharMap[key]?.let { it to newValue })
+                }
+        }
+    return specialCharMap + nameMappings // note that this order is important as keys from first are overwritten
 }
 
 private fun Entry.formatFullName(): String {
@@ -117,7 +132,7 @@ private fun Entry.formatFullName(): String {
                     ?.takeIf { it.substringAfterLast(" ") in forwardSpecialNameParts }
                     ?.let {
                         // fixes extra space added in some names like "MC CORMICK"
-                        val charBetween = if (it.substringAfterLast(" ") == "MC") "" else " "
+                        val charBetween = if (it.substringAfterLast(" ") in extraSpaceNameParts) "" else " "
                         acc.dropLast(1) + "$it$charBetween$s"
                     } ?: (acc + s)
             }.foldRight(emptyList<String>()) { s, acc ->
