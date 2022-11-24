@@ -25,19 +25,19 @@ val globalSetOfQs = mutableSetOf<String>()
 
 fun main(args: Array<String>) {
     if ("-instructor" in args) {
-        getInstructors(writeDir = "json-data/extra-data/S23-instructors")
+        generateLatestProfCourseMappings(writeDir = "json-data/extra-data/S23-instructors")
     }
     if ("-updateByProf" in args) {
         generateEntriesByProfMap(9)
-        getProfList("json-data/extra-data")
+        generateCompleteProfList("json-data/extra-data")
     }
 }
 
-fun getProfList(writeDir: String? = null): List<Instructor> {
+fun generateCompleteProfList(writeDir: String? = null): List<Instructor> {
     val profList = LocalSource().getAllEntriesByProfInDir()
         .flatMapEachDept { school, dept, entriesByProf ->
             entriesByProf.map { (name, entries) ->
-                Instructor(name, school, dept, entries.last().semester)
+                Instructor(name, school, dept, entries.last().semester) // entries are sorted so last() works
             }
         }.sortedBy { it.name }
     writeDir?.let {
@@ -75,7 +75,8 @@ fun parseDeptsFromSIRS(
     writeDir: String,
     extraEntries: EntriesMap = emptyMap(),
 ) {
-    runBlocking { entriesSource.getAllLatestEntries(schoolMap.values) }.addOldEntries(extraEntries)
+    runBlocking { entriesSource.getAllLatestEntries(schoolMap.values) }
+        .addOldEntries(extraEntries)
         .forEach { (school, deptsMap) ->
             deptsMap.forEach dept@{ (dept, entries) ->
                 globalSetOfQs.addAll(entries.flatMap { it.questions ?: emptyList() })
@@ -87,21 +88,6 @@ fun parseDeptsFromSIRS(
                 }
             }
         }
-
-//    schoolDeptsMap.forEach { (school, value) ->
-//        value.depts.forEach dept@{ dept ->
-//            // Wanted to have "launch" here for async but that breaks Rutgers servers
-//            val entries = runBlocking { entriesSource.getLatestEntriesInDept(school, dept) }.ifEmpty { return@dept }
-//                .plus(extraEntries[school]?.get(dept).orEmpty())
-//            globalSetOfQs.addAll(entries.map { it.questions ?: emptyList() }.flatten())
-//            println("banana $globalSetOfQs")
-//
-//            stringForFile(entries)?.let {
-//                val file = makeFileAndDir("$writeDir/$school/$dept.txt")
-//                file.writeText(it)
-//            }
-//        }
-//    }
 }
 
 fun parseEntriesFromSIRS(
@@ -120,9 +106,10 @@ fun parseEntriesFromSIRS(
             val entries = runBlocking {
                 semesters.pmap { sirsSource.getEntriesByDeptOrCourse(it, school, dept) }
             }.flatten().plus(extraEntries[school]?.get(dept).orEmpty()).ifEmpty { return@map null }
-
             dept to entries
-        }.filterNotNull().groupBy({ it.first }, { it.second }).mapValues { it.value.flatten() }
+        }.filterNotNull()
+            .groupBy({ it.first }, { it.second })
+            .mapValues { it.value.flatten() }
             .forEach { (dept, entries) ->
                 globalSetOfQs.addAll(entries.map { it.questions ?: emptyList() }.flatten())
                 stringForFile(entries)?.let {
@@ -133,52 +120,50 @@ fun parseEntriesFromSIRS(
     }
 }
 
-fun getInstructors(
+fun generateLatestProfCourseMappings(
     socSource: SOCSource = SOCSource(),
     semester: Semester = DefaultParams.semester,
     campuses: List<Campus> = Campus.values().toList(),
     writeDir: String? = null, // if null, don't write to file
 ): Map<String, List<String>> {
-    return runBlocking {
-        val entries = LocalSource().getAllEntriesByProfInDir().mapEachDept { _, _, map -> map.keys }
+    val entries = LocalSource().getAllEntriesByProfInDir().mapEachDept { _, _, map -> map.keys }
 
-        val courseToProfs = campuses.flatMap { socSource.getCourses(semester, it) }
-            .groupBy(
-                keySelector = { it.courseString },
-                valueTransform = { courseListing ->
-                    courseListing.sections.flatMap { section ->
-                        section.instructors.map { it.name }
-                    }
+    val courseToProfs = runBlocking { campuses.flatMap { socSource.getCourses(semester, it) } }
+        .groupBy(
+            keySelector = { it.courseString },
+            valueTransform = { courseListing ->
+                courseListing.sections.flatMap { section ->
+                    section.instructors.map { it.name }
                 }
-            ).mapValues { (key, value) ->
-                val existingNames = run {
-                    val (school, dept, _) = key.split(":")
-                    entries[school]?.get(dept)
-                } ?: return@mapValues emptyList()
-                value.flatten().distinct().mapNotNull { originalName ->
-                    val name = originalName.run {
-                        if (" " in this && "," !in this) replace(" ", ", ")
-                        else this
-                    }
-                    existingNames.singleOrNull { it.startsWith(name) }
-                        ?: existingNames.singleOrNull { it == name.take(name.indexOf(",") + 3) }
-                        ?: existingNames.singleOrNull { it.startsWith(name.substringBefore(",")) }
-                }.sorted()
-            }.filterValues { it.isNotEmpty() }
-            .also { println("${it.size} courses with profs, ${it.count { (_, v) -> v.size > 1 }} with 2+ profs") }
+            }
+        ).mapValues { (key, value) ->
+            val existingNames = run {
+                val (school, dept, _) = key.split(":")
+                entries[school]?.get(dept)
+            } ?: return@mapValues emptyList()
+            value.flatten().toSet().mapNotNull { originalName ->
+                val name = originalName.run {
+                    if (" " in this && "," !in this) replace(" ", ", ")
+                    else this
+                }
+                existingNames.singleOrNull { it.startsWith(name) }
+                    ?: existingNames.singleOrNull { it == name.take(name.indexOf(",") + 3) }
+                    ?: existingNames.singleOrNull { it.startsWith(name.substringBefore(",")) }
+            }.sorted()
+        }.filterValues { it.isNotEmpty() }
+        .also { println("${it.size} courses with profs, ${it.count { (_, v) -> v.size > 1 }} with 2+ profs") }
 
-        val profToCourses = courseToProfs.flatMap { (key, value) ->
-            value.map { "$it ${key.substringBeforeLast(":")}" to key }
-        }.groupBy(keySelector = { it.first }, valueTransform = { it.second })
-            .also { println("${it.size} profs with courses") }
+    val profToCourses = courseToProfs.flatMap { (key, value) ->
+        value.map { "$it ${key.substringBeforeLast(":")}" to key }
+    }.groupBy(keySelector = { it.first }, valueTransform = { it.second })
+        .also { println("${it.size} profs with courses") }
 
-        (profToCourses + courseToProfs).toSortedMap().toMap()
-    }.also { instructorsMap ->
-        writeDir?.let {
-            val file = makeFileAndDir("$it.json")
-            file.writeText(Json.encodeToString(instructorsMap))
-        }
+    val finalMap = (profToCourses + courseToProfs).toSortedMap().toMap()
+    writeDir?.let {
+        val file = makeFileAndDir("$it.json")
+        file.writeText(Json.encodeToString(finalMap))
     }
+    return finalMap
 }
 
 fun EntriesByProfMap.printPossibleNameAdjustments(printURL: Boolean = true) {
