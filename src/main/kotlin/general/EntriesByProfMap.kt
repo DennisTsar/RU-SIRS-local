@@ -18,7 +18,7 @@ fun EntriesMap.toEntriesByProfMap(): EntriesByProfMap =
                     || listOf("", ",", "-", "--", "TA", "(Recitation)").any { it == prof }
                     || prof.likelyMultipleProfs()
                     || entry.scores.size < 100 // for now
-        }.mapByProfs()
+        }.mapByProf()
     }
 
 private fun String.likelyMultipleProfs(): Boolean {
@@ -33,7 +33,7 @@ private fun String.likelyMultipleProfs(): Boolean {
     return ";" in altered || filtered.size > 3
 }
 
-fun List<Entry>.mapByProfs(): EntriesByProf {
+fun List<Entry>.mapByProf(): EntriesByProf {
     val adjustedNames = autoNameAdjustments()
 
     return groupBy { entry ->

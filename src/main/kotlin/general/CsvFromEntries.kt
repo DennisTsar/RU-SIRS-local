@@ -6,7 +6,7 @@ import getTotalRatings
 import roundToDecimal
 
 fun List<Entry>.toCsv(): String? {
-    val profRatings = mapByProfs()
+    val profRatings = mapByProf()
         .filterValues { it.isNotEmpty() }
         .mapValues { (_, entries) ->
             entries.getTotalRatings()[8].getRatingStats() // This is the teaching effectiveness question
