@@ -23,13 +23,13 @@ fun EntriesMap.toEntriesByProfMap(): EntriesByProfMap =
 
 private fun String.likelyMultipleProfs(): Boolean {
     val listOfAccepted = backwardSpecialNameParts + setOf(
-        "ED.D.", "EZZAT", "DAGRACIA", "DESILVA", "SAI", "RUI", "GRACA", "MAI", "N", "FACHE"
+        "", "ED.D.", "EZZAT", "DAGRACIA", "DESILVA", "SAI", "RUI", "GRACA", "MAI", "N", "FACHE"
     )
-    val altered = replace(" \\(.*\\)|-".toRegex(), "") // replace content in parentheses & removes dashes
+    val altered = replace(" \\(.*\\)|-".toRegex(), "") // replaces content in parentheses & removes dashes
         .replace("&quot;", "\"")
         .uppercase()
 
-    val filtered = altered.split(" ", ",").filter { it.isNotBlank() } - listOfAccepted
+    val filtered = altered.split(" ", ",") - listOfAccepted
     return ";" in altered || filtered.size > 3
 }
 
@@ -41,26 +41,20 @@ fun List<Entry>.mapByProfs(): EntriesByProf {
     }
 }
 
-// This function is pretty complex, so I'm going to try to explain it here
-// It's purpose is to figure out what different names actually refer to the same person
-// Ex. "Smith", "Smith, John", and "Smith, J" are likely all the same person
-// (as long as there is no "Smith, Jane" or something like that)
-// To do this, it takes quite a few steps
-// 1. Format instructor names to be "Last, First" (or "Last, First Initial" or just "Last", depending on given info)
-// 2. Then, group the names by last name. Now, for each grouping:
-// 3a. We start with the last name and a list of all the first names (or first name initials) that go with it
-// 3b. We then group the first names by first initial
-// 3c. For each grouping of first names by first initial:
-// 3c-i. We check if all the non-initial names match (i.e. all start in same way - "Ron/Ronald", "Ken/Kenneth", etc.)
-// 3c-ii. If they do, we map all of them to the longest name
-// 3c-iii. If not, we just leave an empty list
-// 3c-iv. However, if there are no non-initial names, we map the initial name to itself - to not have an empty list
-// 3d. Because, if the resulting mappings exist, we also add the map of the lone last name to the mapped value
-// 3e. At this point, we also incorporate into the map the names with special chars, preferring them if they exist
-// 4. Finally, we add a mapping of special char names by their non-special version, in case they weren't already added
-// If you made it this far, good luck. I hope this helps. :)
-// And if you figured out a simpler way to get the same results - please implement it!
-private fun List<Entry>.autoNameAdjustments(): Map<String, String> {
+// This function attempts to figure out and fix differently formatted names that actually refer to the same prof
+// Currently it does:
+// 1. Matches a last-name only prof to one that has that last name also a first name, if present and unique
+// ex. "SMITH" turns to "SMITH, JOHN" if there are no other "SMITH"s
+// 2. Matches a last + first initial name with a last + full first name, if present and unique
+// ex. "SMITH, J" turns to "SMITH, JOHN" if there are no other "SMITH, J..."s
+// 3. Ignores dashes and apostrophes when matching, but includes those special chars in the final name if present
+// ex. "OREILLYJAMES, JOHN" turns to "O'REILLY-JAMES, JOHN" if the latter is present
+// 4. Matches first names if one is a substring (0,n) of the other
+// ex. "SMITH, JOHN" turns to "SMITH, JOHNNY" if the latter is present
+// 5. Assumes if a last name consists of only one letter, it's actually the first name, and treats the supposed
+// first name as the last name. Note that all other rules are applied to this new name.
+// ex. "J, SMITH" is assumed to be "SMITH, J" and will turn to "SMITH, JOHN" if the latter is present
+fun List<Entry>.autoNameAdjustments(): Map<String, String> {
     val names = map { it.formatFullName() }
 
     val specialChars = listOf('-', '\'')
@@ -72,7 +66,7 @@ private fun List<Entry>.autoNameAdjustments(): Map<String, String> {
     val namesInitiallyParsed = names.map { it.removeSpecialChars() }.toSet()
 
     // assume that all names where last name is only one letter must have been flipped
-    // i.e. "J, SMITH" is actually "SMITH, J"
+    // ex. "J, SMITH" is actually "SMITH, J"
     // so we add "SMITH, J" to the list of names and keep track of it, so we can later map it back as "J, SMITH"
     val (flippedNames, properNames) = namesInitiallyParsed.partition {
         it.substringBefore(", ", "").length == 1
@@ -86,12 +80,12 @@ private fun List<Entry>.autoNameAdjustments(): Map<String, String> {
             valueTransform = { it.substringAfter(", ", "") },
         ).flatMap { (lastName, commonLast) ->
             val byFirstInitial = commonLast
-                .minus("") // remove string that only had last name
+                .minus("") // we don't care about string that only had last name
                 .groupBy { it[0] } // group by 1st initial - since some entries only have 1st initial
 
             byFirstInitial.flatMap { (initial, commonInitial) ->
                 val fullFirsts = commonInitial
-                    .minus(initial.toString()) // remove string with only initial
+                    .minus(initial.toString()) // we don't care about with only initial for first name matching
                     .sortedBy { it.length } // sorted to check if shortest name matches longer & to use the longest name
                     .takeIf { it.isNotEmpty() } // when only initial is present -> need to differentiate from false
                 // treat names like "Ron/Ronald", "Ken/Kenneth", etc. as same name
@@ -101,48 +95,58 @@ private fun List<Entry>.autoNameAdjustments(): Map<String, String> {
                     null -> mapOf(initial to initial) // so that let {} below adds last name to map
                 }.map { "$lastName, ${it.key}" to "$lastName, ${it.value}" }
             }.let {
-                if (byFirstInitial.size == 1 && it.isNotEmpty())
-                    it.plus(lastName to it[0].second) // pair "Smith" with first name if only one exists
+                // pair "Smith" with first name if only one exists
+                if (byFirstInitial.size == 1 && it.isNotEmpty() && "" in commonLast)
+                    it.plus(lastName to it[0].second)
                 else it
             }
         }.flatMap { (originalKey, value) ->
-            val newValue = specialCharMap[value] ?: value // use name with dashes if it exists
-            // for both normal and (potentially) flipped name, map key and special char version of key to newValue
-            // i.e. "Smith, J" and "J, Smith" both map to "Smith, John"
-            // main point is we need to modify existing map, plus add special case maps
-            listOfNotNull(originalKey, originalKey.takeIf { it in fixedNames }?.flipName())
-                .flatMap { key ->
-                    listOfNotNull(key to newValue, specialCharMap[key]?.let { it to newValue })
-                }
+            // Here we adjust the map to account for the flipped and special char containing names we've been ignoring
+            // Name mappings should use the special char version if it exists,
+            // and flipped names need to be mapped to the same thing that the un-flipped name maps to
+            val newValue = specialCharMap[value] ?: value
+            listOfNotNull(
+                originalKey,
+                originalKey.takeIf { it in fixedNames }?.flipName(),
+            ).flatMap { key ->
+                listOfNotNull(
+                    key to newValue,
+                    specialCharMap[key]?.let { it to newValue },
+                )
+            }
         }
     return specialCharMap + nameMappings // note that this order is important as keys from first are overwritten
 }
 
 private fun Entry.formatFullName(): String {
-    return instructor
+    // un-separate the specials from other parts of the name - accounts for first/last names with spaces within them
+    // first combine them forwards, then backwards
+    fun List<String>.foldInSpecialNameParts(): List<String> {
+        return fold(emptyList<String>()) { acc, s ->
+            acc.lastOrNull()
+                ?.takeIf { it.substringAfterLast(" ") in forwardSpecialNameParts }
+                ?.let {
+                    // fixes extra space added in some names like "MC CORMICK"
+                    val charBetween = if (it.substringAfterLast(" ") in extraSpaceNameParts) "" else " "
+                    acc.dropLast(1) + "$it$charBetween$s"
+                } ?: (acc + s)
+        }.foldRight(emptyList()) { s, acc ->
+            acc.firstOrNull()
+                ?.takeIf { it.substringBefore(" ") in backwardSpecialNameParts }
+                ?.let { listOf("$s $it") + acc.drop(1) }
+                ?: (listOf(s) + acc)
+        }
+    }
+
+    val name = instructor
         .trim()
-        .replace(" \\(.*\\)|,|\\.".toRegex(), "") // removes stuff in parentheses + removes commas & periods
+        .replace(" \\(.*\\)|,|\\.".toRegex(), "") // remove stuff in parentheses + remove commas & periods
         .uppercase()
         .split(" ")
-        .let { split ->
-            // un-separate the specials from other parts of the name
-            // first combine them forwards, then backwards
-            split.fold(emptyList<String>()) { acc, s ->
-                acc.lastOrNull()
-                    ?.takeIf { it.substringAfterLast(" ") in forwardSpecialNameParts }
-                    ?.let {
-                        // fixes extra space added in some names like "MC CORMICK"
-                        val charBetween = if (it.substringAfterLast(" ") in extraSpaceNameParts) "" else " "
-                        acc.dropLast(1) + "$it$charBetween$s"
-                    } ?: (acc + s)
-            }.foldRight(emptyList<String>()) { s, acc ->
-                acc.firstOrNull()
-                    ?.takeIf { it.substringBefore(" ") in backwardSpecialNameParts }
-                    ?.let { listOf("$s $it") + acc.drop(1) }
-                    ?: (listOf(s) + acc)
-            }
-        }.let { parts ->
-            val name = parts[0] + (parts.getOrNull(1)?.let { ", $it" } ?: "") // Adds first initial if present
-            manualNameAdjustment(name, code)
-        }
+        .foldInSpecialNameParts()
+        .take(2) // ignore everything after last + first
+        .joinToString(", ")
+
+    return manualNameAdjustment(name, code)
+
 }
