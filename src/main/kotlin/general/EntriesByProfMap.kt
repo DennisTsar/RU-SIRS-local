@@ -57,20 +57,19 @@ fun List<Entry>.mapByProf(): EntriesByProf {
 fun List<Entry>.autoNameAdjustments(): Map<String, String> {
     val names = map { it.formatFullName() }
 
-    val specialChars = listOf('-', '\'')
+    val specialChars = setOf('-', '\'')
     fun String.removeSpecialChars(): String = filterNot { it in specialChars }
 
     val specialCharMap = names.filter { name -> specialChars.any { it in name } }
         .associateBy { it.removeSpecialChars() }
 
-    val namesInitiallyParsed = names.map { it.removeSpecialChars() }.toSet()
-
     // assume that all names where last name is only one letter must have been flipped
     // ex. "J, SMITH" is actually "SMITH, J"
     // so we add "SMITH, J" to the list of names and keep track of it, so we can later map it back as "J, SMITH"
-    val (flippedNames, properNames) = namesInitiallyParsed.partition {
-        it.substringBefore(", ", "").length == 1
-    }
+    val (flippedNames, properNames) = names
+        .map { it.removeSpecialChars() }
+        .partition { it.substringBefore(", ", "").length == 1 }
+
     fun String.flipName(): String = split(", ").reversed().joinToString(", ")
     val fixedNames = flippedNames.map { it.flipName() }
 
