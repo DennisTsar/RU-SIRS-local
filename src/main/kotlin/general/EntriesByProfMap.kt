@@ -10,8 +10,8 @@ private val extraSpaceNameParts = setOf("MC", "O'")
 private val forwardSpecialNameParts = extraSpaceNameParts + setOf("DER", "DE", "DA", "DEL", "LA", "UZ", "EL", "VAN")
 private val backwardSpecialNameParts = forwardSpecialNameParts + setOf("II", "III", "IV", "COL")
 
-fun EntriesMap.toEntriesByProfMap(): EntriesByProfMap =
-    mapEachDept { _, _, entries ->
+fun EntriesMap.toEntriesByProfMap(): EntriesByProfMap {
+    return mapEachDept { _, _, entries ->
         entries.filterNot { entry ->
             val prof = entry.instructor
             listOf("do not use", "error", "faculty", "proctortrack", "instructor").any { it in prof.lowercase() }
@@ -20,6 +20,7 @@ fun EntriesMap.toEntriesByProfMap(): EntriesByProfMap =
                     || entry.scores.size < 100 // for now
         }.mapByProf()
     }
+}
 
 private fun String.likelyMultipleProfs(): Boolean {
     val listOfAccepted = backwardSpecialNameParts + setOf(
@@ -28,14 +29,12 @@ private fun String.likelyMultipleProfs(): Boolean {
     val altered = replace(" \\(.*\\)|-".toRegex(), "") // replaces content in parentheses & removes dashes
         .replace("&quot;", "\"")
         .uppercase()
-
     val filtered = altered.split(" ", ",") - listOfAccepted
     return ";" in altered || filtered.size > 3
 }
 
 fun List<Entry>.mapByProf(): EntriesByProf {
     val adjustedNames = autoNameAdjustments()
-
     return groupBy { entry ->
         entry.formatFullName().let { adjustedNames[it] ?: it }
     }
@@ -136,7 +135,6 @@ private fun Entry.formatFullName(): String {
                 ?: (listOf(s) + acc)
         }
     }
-
     val name = instructor
         .trim()
         .replace(" \\(.*\\)|,|\\.".toRegex(), "") // remove stuff in parentheses + remove commas & periods
@@ -145,7 +143,5 @@ private fun Entry.formatFullName(): String {
         .foldInSpecialNameParts()
         .take(2) // ignore everything after last + first
         .joinToString(", ")
-
     return manualNameAdjustment(name, code)
-
 }
