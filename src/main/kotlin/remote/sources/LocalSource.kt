@@ -12,6 +12,7 @@ import remote.EntriesFromFileSource
 import remote.ExtraDataSource
 import remote.SchoolMapSource
 import java.io.File
+import java.io.FileNotFoundException
 
 class LocalSource(
     val mainJsonDir: String = "json-data/data-9",
@@ -52,11 +53,31 @@ class LocalSource(
 
     override suspend fun getSchoolMap(): Map<String, School> = getSchoolMapLocal()
 
+    @Deprecated(
+        "Data is now stored in separate files by dept. This function is kept to get F22 data.",
+        replaceWith = ReplaceWith("getTeachingDataLocal"),
+    )
     fun getLatestInstructorsLocal(term: String): Map<String, List<String>> =
         Json.decodeFromString(File("$extraJsonDir/$term-instructors.json").readText())
 
+    @Suppress("DEPRECATION")
+    @Deprecated(
+        "Data is now stored in separate files by dept. This function is kept to get F22 data.",
+        replaceWith = ReplaceWith("getTeachingData"),
+    )
     override suspend fun getLatestInstructors(term: String): Map<String, List<String>> =
         getLatestInstructorsLocal(term)
+
+    fun getTeachingDataLocal(school: String, dept: String, term: String): Map<String, List<String>> {
+        return try {
+            Json.decodeFromString(File("$extraJsonDir/$term-instructors/$school/$dept.json").readText())
+        } catch (e: FileNotFoundException) {
+            emptyMap()
+        }
+    }
+
+    override suspend fun getTeachingData(school: String, dept: String, term: String): Map<String, List<String>> =
+        getTeachingDataLocal(school, dept, term)
 
     fun getDeptMapLocal(): Map<String, String> =
         Json.decodeFromString(File("$extraJsonDir/deptNameMap.json").readText())

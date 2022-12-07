@@ -5,9 +5,11 @@ import EntriesMap
 import Entry
 import Instructor
 import School
+import SchoolDeptsMap
 import Semester
 import flatMapEachDept
 import forEachDept
+import generateSchoolMap
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -25,7 +27,7 @@ val globalSetOfQs = mutableSetOf<String>()
 
 fun main(args: Array<String>) {
     if ("-instructor" in args) {
-        generateLatestProfCourseMappings(writeDir = "json-data/extra-data/S23-instructors")
+        generateLatestProfCourseMappings()
     }
     if ("-updateByProf" in args) {
         generateEntriesByProfMap(9)
@@ -121,12 +123,14 @@ fun parseEntriesFromSIRS(
 }
 
 fun generateLatestProfCourseMappings(
-    socSource: SOCSource = SOCSource(),
     semester: Semester = DefaultParams.semester,
     campuses: List<Campus> = Campus.values().toList(),
-    writeDir: String? = null, // if null, don't write to file
-): Map<String, List<String>> {
-    val entries = LocalSource().getAllEntriesByProfInDir().mapEachDept { _, _, map -> map.keys }
+    writeDir: String? = "json-data/extra-data/S23-teaching",
+): SchoolDeptsMap<Map<String, List<String>>> {
+    val localSource = LocalSource()
+    val socSource = SOCSource()
+
+    val entries = localSource.getAllEntriesByProfInDir().mapEachDept { _, _, map -> map.keys }
 
     val courseToProfs = runBlocking { campuses.flatMap { socSource.getCourses(semester, it) } }
         .groupBy(
@@ -153,16 +157,22 @@ fun generateLatestProfCourseMappings(
         }.filterValues { it.isNotEmpty() }
         .also { println("${it.size} courses with profs, ${it.count { (_, v) -> v.size > 1 }} with 2+ profs") }
 
-    val profToCourses = courseToProfs.flatMap { (key, value) ->
-        value.map { "$it ${key.substringBeforeLast(":")}" to key }
-    }.groupBy(keySelector = { it.first }, valueTransform = { it.second })
-        .also { println("${it.size} profs with courses") }
-
-    val finalMap = (profToCourses + courseToProfs).toSortedMap().toMap()
-    writeDir?.let {
-        val file = makeFileAndDir("$it.json")
-        file.writeText(Json.encodeToString(finalMap))
+    val finalMap = runBlocking { // doesn't make network call, but generateSchoolMap is aync
+        localSource.getSchoolMapLocal().values
+            .generateSchoolMap { school, dept ->
+                // not very efficient to do this for every dept, but simple and still quick
+                val filteredMap = courseToProfs.filterKeys { it.startsWith("$school:$dept:") }
+                val profToCourses = filteredMap.flatMap { (course, profs) ->
+                    profs.map { it to course }
+                }.groupBy(keySelector = { it.first }, valueTransform = { it.second })
+                filteredMap + profToCourses
+            }
     }
+
+    val totalSize = finalMap.map { it.value.map { it.value.size } }.flatten().sum()
+    println("${totalSize - courseToProfs.size} profs with courses")
+
+    writeDir?.let { finalMap.writeToDir(it) }
     return finalMap
 }
 
