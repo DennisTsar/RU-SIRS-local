@@ -36,7 +36,7 @@ fun main(args: Array<String>) {
 }
 
 fun generateCompleteProfList(writeDir: String? = null): List<Instructor> {
-    val profList = LocalSource().getAllEntriesByProfInDir()
+    val profList = LocalSource().getAllEntriesByProf()
         .flatMapEachDept { school, dept, entriesByProf ->
             entriesByProf.map { (name, entries) ->
                 Instructor(name, school, dept, entries.last().semester) // entries are sorted so last() works
@@ -54,7 +54,7 @@ fun generateEntriesByProfMap(folderNum: Int, writeToDir: Boolean = true): Entrie
         throw Exception("Failed to delete json-data/data-$folderNum-by-prof")
     val localSource = LocalSource()
     val schoolMap = localSource.getSchoolMapLocal()
-    return localSource.getAllEntriesInDir<Entry>("json-data/data-$folderNum")
+    return localSource.getAllEntries<Entry>("json-data/data-$folderNum")
         .toEntriesByProfMap()
         .filterKeys { it in schoolMap.keys }
         .mapValues { (school, entries) ->
@@ -130,7 +130,7 @@ fun generateLatestProfCourseMappings(
     val localSource = LocalSource()
     val socSource = SOCSource()
 
-    val entries = localSource.getAllEntriesByProfInDir().mapEachDept { _, _, map -> map.keys }
+    val entries = localSource.getAllEntriesByProf().mapEachDept { _, _, map -> map.keys }
 
     val courseToProfs = runBlocking { campuses.flatMap { socSource.getCourses(semester, it) } }
         .groupBy(

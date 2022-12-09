@@ -18,13 +18,13 @@ class LocalSource(
     val mainJsonDir: String = "json-data/data-9",
     private val extraJsonDir: String = "json-data/extra-data",
 ) : EntriesFromFileSource, SchoolMapSource, ExtraDataSource {
-    fun getEntriesFromDirLocal(school: String, dept: String, folderNum: Int): List<Entry> =
+    fun getEntriesLocal(school: String, dept: String, folderNum: Int): List<Entry> =
         Json.decodeFromString(File("json-data/data-$folderNum/$school/$dept.json").readText())
 
-    override suspend fun getEntriesFromDir(school: String, dept: String, folderNum: Int): List<Entry> =
-        getEntriesFromDirLocal(school, dept, folderNum)
+    override suspend fun getEntries(school: String, dept: String, folderNum: Int): List<Entry> =
+        getEntriesLocal(school, dept, folderNum)
 
-    inline fun <reified T> getAllEntriesInDir(readDir: String = mainJsonDir): Map<String, Map<String, List<T>>> {
+    inline fun <reified T> getAllEntries(readDir: String = mainJsonDir): Map<String, Map<String, List<T>>> {
         return File(readDir).walkDirectory().associate { file ->
             val deptMap = file.walkDirectory().associate {
                 it.nameWithoutExtension to Json.decodeFromString<List<T>>(it.readText())
@@ -33,13 +33,13 @@ class LocalSource(
         }.filterValues { it.isNotEmpty() }
     }
 
-    fun getEntriesByProfFromDirLocal(school: String, dept: String, folderNum: Int): EntriesByProf =
+    fun getEntriesByProfLocal(school: String, dept: String, folderNum: Int): EntriesByProf =
         Json.decodeFromString(File("json-data/data-$folderNum-by-prof/$school/$dept.json").readText())
 
-    override suspend fun getEntriesByProfFromDir(school: String, dept: String, folderNum: Int): EntriesByProf =
-        getEntriesByProfFromDirLocal(school, dept, folderNum)
+    override suspend fun getEntriesByProf(school: String, dept: String, folderNum: Int): EntriesByProf =
+        getEntriesByProfLocal(school, dept, folderNum)
 
-    fun getAllEntriesByProfInDir(readDir: String = "$mainJsonDir-by-prof"): EntriesByProfMap {
+    fun getAllEntriesByProf(readDir: String = "$mainJsonDir-by-prof"): EntriesByProfMap {
         return File(readDir).walkDirectory().associate { file ->
             val deptMap = file.walkDirectory().associate {
                 it.nameWithoutExtension to Json.decodeFromString<EntriesByProf>(it.readText())
@@ -89,8 +89,8 @@ class LocalSource(
 
     override suspend fun getAllInstructors(): List<Instructor> = getAllInstructorsLocal()
 
-    fun getDirSchoolMapLocal(dataDir: String): Map<String, School> =
+    fun getSchoolMapLocal(dataDir: String): Map<String, School> =
         Json.decodeFromString(File("json-data/$dataDir/schoolMap.json").readText())
 
-    override suspend fun getDirSchoolMap(dataDir: String): Map<String, School> = getDirSchoolMapLocal(dataDir)
+    override suspend fun getSchoolMap(dataDir: String): Map<String, School> = getSchoolMapLocal(dataDir)
 }

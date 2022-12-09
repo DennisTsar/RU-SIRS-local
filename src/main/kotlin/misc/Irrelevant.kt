@@ -5,7 +5,7 @@ import Entry
 import remote.sources.LocalSource
 
 fun validateMapOfEntries(
-    map1: EntriesMap = LocalSource().getAllEntriesInDir(),
+    map1: EntriesMap = LocalSource().getAllEntries(),
     map2: EntriesMap,
 ) {
     map1.forEach { (k, _) ->
@@ -25,8 +25,8 @@ fun validateMapOfEntries(
 
 fun compareDataDirs(dir1: String, dir2: String, compareSizes: Boolean = true) {
     val localSource = LocalSource()
-    val map1 = localSource.getAllEntriesInDir<Entry>(dir1)
-    val map2 = localSource.getAllEntriesInDir<Entry>(dir2)
+    val map1 = localSource.getAllEntries<Entry>(dir1)
+    val map2 = localSource.getAllEntries<Entry>(dir2)
 
     // region silliness
     val compareSchoolMap: Map<*, Map<*, List<*>>>.(Map<*, *>, String, String) -> Unit =

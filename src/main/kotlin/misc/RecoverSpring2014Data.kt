@@ -1,10 +1,10 @@
 package misc
 
+import EntriesMap
 import Entry
 import QsMap
 import TenQs
 import data.old_data.EntryOld3
-import EntriesMap
 import general.writeToDir
 import remote.sources.LocalSource
 
@@ -39,7 +39,7 @@ private fun EntryOld3.toEntry(): Entry {
 
 private fun getSpring2014Map(): EntriesMap {
     return LocalSource()
-        .getAllEntriesInDir<EntryOld3>("old-json/json-data-4") // last compilation of original Spring 2014 data
+        .getAllEntries<EntryOld3>("old-json/json-data-4") // last compilation of original Spring 2014 data
         .mapValues { (_, deptMap) ->
             deptMap.mapValues { (_, entries) ->
                 entries

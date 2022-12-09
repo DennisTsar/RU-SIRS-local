@@ -145,6 +145,6 @@ class SIRSSource(private val API_KEY: String) : RemoteApi, SchoolMapSource, Entr
 
     override suspend fun getSchoolMap(): Map<String, School> = getSchoolMapUsingSOC()
 
-    override suspend fun getLatestEntriesInDept(school: String, dept: String): List<Entry> =
+    override suspend fun getLatestEntries(school: String, dept: String): List<Entry> =
         getEntriesOverSems(school, dept)
 }
