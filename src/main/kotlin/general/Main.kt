@@ -81,7 +81,7 @@ fun parseDeptsFromSIRS(
         .addOldEntries(extraEntries)
         .forEach { (school, deptsMap) ->
             deptsMap.forEach dept@{ (dept, entries) ->
-                globalSetOfQs.addAll(entries.flatMap { it.questions ?: emptyList() })
+                globalSetOfQs.addAll(entries.flatMap { it.questions.orEmpty() })
                 println("banana $globalSetOfQs")
 
                 stringForFile(entries)?.let {
@@ -102,7 +102,7 @@ fun parseEntriesFromSIRS(
 ) {
     schoolDeptsMap.forEach { (school, value) ->
         // ensures depts only present in extraEntries are preserved
-        val extra = extraEntries[school]?.keys ?: emptySet()
+        val extra = extraEntries[school]?.keys.orEmpty()
         (value.depts + extra).map { dept ->
             //Wanted to have "launch" here for async but that breaks Rutgers servers
             val entries = runBlocking {
@@ -113,7 +113,7 @@ fun parseEntriesFromSIRS(
             .groupBy({ it.first }, { it.second })
             .mapValues { it.value.flatten() }
             .forEach { (dept, entries) ->
-                globalSetOfQs.addAll(entries.map { it.questions ?: emptyList() }.flatten())
+                globalSetOfQs.addAll(entries.map { it.questions.orEmpty() }.flatten())
                 stringForFile(entries)?.let {
                     val file = makeFileAndDir("$writeDir/$school/${dept.replace(":", "sc")}.json")
                     file.writeText(it)
