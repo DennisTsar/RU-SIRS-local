@@ -2,7 +2,7 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
-    application
+//    application
 }
 
 group = "dev.letter"
@@ -20,6 +20,6 @@ dependencies {
     implementation(project(":common"))
 }
 
-application {
-    mainClass.set("general.MainKt")
-}
+//application {
+//    mainClass.set("general.MainKt")
+//}
