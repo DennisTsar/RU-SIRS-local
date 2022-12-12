@@ -105,7 +105,7 @@ class SIRSSource(private val API_KEY: String) : RemoteApi, SchoolMapSource, Entr
         // codes of schools with non-empty names
         val sirsSchools = sirsRes.schools.filter { it[1].isNotEmpty() }.map { it[0] }
 
-        return socSource.getSOCData().units
+        return socSource.getSOCData().schools
             .filter { it.code in sirsSchools }
             .pmap { school ->
                 val depts = semesters.flatMap {

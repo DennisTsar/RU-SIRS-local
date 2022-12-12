@@ -1,6 +1,7 @@
 package data.soc
 
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -9,5 +10,6 @@ data class SOCData(
     val coreCodes: List<CoreCodeSimple>,
     val currentTermDate: CurrentTermDate,
     val subjects: List<DescriptionHolder>,
-    val units: List<Unit>,
+    @SerialName("units")
+    val schools: List<School>,
 )
