@@ -15,22 +15,22 @@ import kotlinx.serialization.encoding.Encoder
 data class SOCSchool(
     @SerialName("campus")
     @Serializable(with = CampusesAsStringSerializer::class)
-    val campuses: List<Campus>, // seems to always be either one or all 3
+    val campuses: Set<Campus>, // seems to always be either one or all 3
     val code: String,
     val description: String,
     val homeCampus: Campus,
     val level: String,
 )
 
-object CampusesAsStringSerializer : KSerializer<List<Campus>> {
+object CampusesAsStringSerializer : KSerializer<Set<Campus>> {
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("CampusesAsStringSerializer", PrimitiveKind.STRING)
 
-    override fun serialize(encoder: Encoder, value: List<Campus>) {
+    override fun serialize(encoder: Encoder, value: Set<Campus>) {
         encoder.encodeString(value.joinToString())
     }
 
-    override fun deserialize(decoder: Decoder): List<Campus> {
-        return decoder.decodeString().split(", ").map { Campus.valueOf(it) }
+    override fun deserialize(decoder: Decoder): Set<Campus> {
+        return decoder.decodeString().split(", ").map { Campus.valueOf(it) }.toSet()
     }
 }
