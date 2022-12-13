@@ -12,7 +12,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
 @Serializable()
-data class School(
+data class SOCSchool(
     @SerialName("campus")
     @Serializable(with = CampusesAsStringSerializer::class)
     val campuses: List<Campus>, // seems to always be either one or all 3

@@ -11,5 +11,5 @@ data class SOCData(
     val currentTermDate: CurrentTermDate,
     val subjects: List<DescriptionHolder>,
     @SerialName("units")
-    val schools: List<School>,
+    val schools: List<SOCSchool>,
 )
