@@ -90,7 +90,7 @@ class SIRSSource(private val API_KEY: String) : RemoteApi, SchoolMapSource, Entr
     suspend fun getSpecificSchoolMap(semester: Semester): Map<String, School> {
         return getSchoolsOrDepts(semester).schools.pmap { (code, name) -> // this works as each sublist is always length 2 w/ this format
             val depts = getSchoolsOrDepts(semester, code).depts.toSet()
-            code to School(code, name, depts)
+            code to School(code, name, depts, emptySet())
         }.toMap()
     }
 
@@ -119,6 +119,7 @@ class SIRSSource(private val API_KEY: String) : RemoteApi, SchoolMapSource, Entr
                         .replace("(Grad)", "(G)")
                         .replace("(UG)", "(U)"),
                     depts,
+                    school.campuses,
                 )
             }.associateBy { it.code }
     }

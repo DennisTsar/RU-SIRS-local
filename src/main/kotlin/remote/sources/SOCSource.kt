@@ -1,9 +1,9 @@
 package remote.sources
 
+import Campus
 import Semester
 import data.soc.Course
 import data.soc.SOCData
-import general.Campus
 import general.DefaultParams
 import io.ktor.client.call.*
 import io.ktor.client.plugins.compression.*
@@ -42,4 +42,3 @@ class SOCSource : RemoteApi {
             .let { Json.decodeFromString(it) }
     }
 }
-

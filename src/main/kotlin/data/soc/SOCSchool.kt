@@ -1,7 +1,7 @@
 package data.soc
 
 
-import general.Campus
+import Campus
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

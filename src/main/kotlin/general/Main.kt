@@ -1,5 +1,6 @@
 package general
 
+import Campus
 import EntriesByProfMap
 import EntriesMap
 import Entry
