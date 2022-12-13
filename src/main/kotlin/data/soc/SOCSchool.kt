@@ -27,7 +27,7 @@ object CampusesAsStringSerializer : KSerializer<List<Campus>> {
         PrimitiveSerialDescriptor("CampusesAsStringSerializer", PrimitiveKind.STRING)
 
     override fun serialize(encoder: Encoder, value: List<Campus>) {
-        encoder.encodeString(value.joinToString(","))
+        encoder.encodeString(value.joinToString())
     }
 
     override fun deserialize(decoder: Decoder): List<Campus> {
