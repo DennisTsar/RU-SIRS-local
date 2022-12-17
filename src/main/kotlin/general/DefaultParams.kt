@@ -1,6 +1,7 @@
 package general
 
 import Campus
+import LevelOfStudy
 import Semester
 import SemesterType
 
@@ -15,8 +16,4 @@ object DefaultParams {
     val sirsRange = (firstSemester.year..lastSirsSem.year).flatMap { year ->
         SemesterType.values().map { sem -> Semester(sem, year) }
     }.drop(firstSemester.type.ordinal).dropLast(lastSirsSem.type.other().ordinal)
-}
-
-enum class LevelOfStudy {
-    U, G
 }

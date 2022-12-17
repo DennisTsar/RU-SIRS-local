@@ -1,6 +1,7 @@
 package remote.sources
 
 import Entry
+import LevelOfStudy
 import School
 import Semester
 import data.sirs_courseFilter.SIRSCourseFilterResult
@@ -90,7 +91,7 @@ class SIRSSource(private val API_KEY: String) : RemoteApi, SchoolMapSource, Entr
     suspend fun getSpecificSchoolMap(semester: Semester): Map<String, School> {
         return getSchoolsOrDepts(semester).schools.pmap { (code, name) -> // this works as each sublist is always length 2 w/ this format
             val depts = getSchoolsOrDepts(semester, code).depts.toSet()
-            code to School(code, name, depts, emptySet())
+            code to School(code, name, depts, emptySet(), LevelOfStudy.U) // bad stuff here
         }.toMap()
     }
 
@@ -120,6 +121,7 @@ class SIRSSource(private val API_KEY: String) : RemoteApi, SchoolMapSource, Entr
                         .replace("(UG)", "(U)"),
                     depts,
                     school.campuses,
+                    school.level,
                 )
             }.associateBy { it.code }
     }

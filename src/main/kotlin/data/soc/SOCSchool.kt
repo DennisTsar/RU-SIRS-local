@@ -2,6 +2,7 @@ package data.soc
 
 
 import Campus
+import LevelOfStudy
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -19,7 +20,7 @@ data class SOCSchool(
     val code: String,
     val description: String,
     val homeCampus: Campus,
-    val level: String,
+    val level: LevelOfStudy,
 )
 
 object CampusesAsStringSerializer : KSerializer<Set<Campus>> {
