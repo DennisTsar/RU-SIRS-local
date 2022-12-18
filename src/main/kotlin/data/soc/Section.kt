@@ -13,7 +13,7 @@ data class Section(
     val examCodeText: String,
     val honorPrograms: List<Code>,
     val index: String,
-    val instructors: List<Instructor>,
+    val instructors: List<SOCInstructor>,
     val instructorsText: String,
     val legendKey: String?,
     val majors: List<Major>,
