@@ -84,10 +84,10 @@ class LocalSource(
 
     override suspend fun getDeptMap(): Map<String, String> = getDeptMapLocal()
 
-    fun getAllInstructorsLocal(): List<Instructor> =
-        Json.decodeFromString(File("$extraJsonDir/allInstructors.json").readText())
+    fun getAllInstructorsLocal(dir: String): Map<String, List<Instructor>> =
+        Json.decodeFromString(File("json-data/$dir/allInstructors.json").readText())
 
-    override suspend fun getAllInstructors(): List<Instructor> = getAllInstructorsLocal()
+    override suspend fun getAllInstructors(dir: String): Map<String, List<Instructor>> = getAllInstructorsLocal(dir)
 
     fun getSchoolMapLocal(dataDir: String): Map<String, School> =
         Json.decodeFromString(File("json-data/$dataDir/schoolMap.json").readText())

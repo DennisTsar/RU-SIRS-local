@@ -32,20 +32,21 @@ fun main(args: Array<String>) {
     }
     if ("-updateByProf" in args) {
         generateEntriesByProfMap(9)
-        generateCompleteProfList("json-data/extra-data")
+        generateCompleteProfListBySchool("data-9-by-prof")
     }
 }
 
-fun generateCompleteProfList(writeDir: String? = null): List<Instructor> {
-    val profList = LocalSource().getAllEntriesByProf()
+fun generateCompleteProfListBySchool(dataDir: String, writeToDir: Boolean = true): Map<String, List<Instructor>> {
+    val profList = LocalSource().getAllEntriesByProf(dataDir)
         .flatMapEachDept { school, dept, entriesByProf ->
             entriesByProf.map { (name, entries) ->
                 Instructor(name, school, dept, entries.last().semester) // entries are sorted so last() works
             }
         }.sortedBy { it.name }
-    writeDir?.let {
-        val file = makeFileAndDir("$it/allInstructors.json")
-        file.writeText(Json.encodeToString(profList))
+        .groupBy { it.school }
+    if (writeToDir) {
+        val file = makeFileAndDir("$dataDir/allInstructors.json")
+        file.writeText(Json.encodeToString(profList.toSortedMap().toMap()))
     }
     return profList
 }
