@@ -261,7 +261,7 @@ fun manualNameAdjustment(prof: String, code: String): String {
         }
 
         "01:358" -> when (prof) {
-            "BUCKLEY, MATHEW" -> "BUCKLEY, MATTHEW" //left off here - did not check this one
+            "BUCKLEY, MATHEW" -> "BUCKLEY, MATTHEW"
             "CAMRADA, JULIE", "CAMARADA, JULIE" -> "CAMARDA, JULIE" // this name isn't present but seems to be right
             "DIENSTR, RICHARD" -> "DIENST, RICHARD"
             "IBIRONKE, BODE" -> "IBIRONKE, OLABODE"
@@ -470,7 +470,7 @@ fun manualNameAdjustment(prof: String, code: String): String {
         }
 
         "01:685" -> when (prof) {
-            "ABDELJABER, ABDELHAMID" -> "ABDELJABER, HAMID"
+            "ABDELJABER, ABDELHAMID" -> "ABDELJABER, HAMID" // 01:790
             "HAGHANI, FAKHRI" -> "HAGHANI, FAKHROLMOLOUK" // 01:090, 01:988
             "KHAYYAT, EFE", "EFE, E" -> "KHAYYAT, EMRAH" // 01:013, 01:090, 01:195
             "RATZMAN, ELI" -> "RATZMAN, ELLIOT" // 01:508, 01:563
@@ -518,7 +518,7 @@ fun manualNameAdjustment(prof: String, code: String): String {
         }
 
         "01:790" -> when (prof) {
-            "ABDELJABER, ABDELHAMID" -> "ABDELJABER, HAMID"
+            "ABDELJABER, ABDELHAMID" -> "ABDELJABER, HAMID" // 01:685
             "BATHORY, DENNIS" -> "BATHORY, PETER"
             "BIZZOCO, NIKKI", "BIZOCCO" -> "BIZZOCO, NICOLE"
             "CARNEY-WATERTO", "WATERTON, JO-LEO" -> "CARNEY-WATERTON, JO-LEO"
@@ -852,6 +852,276 @@ fun manualNameAdjustment(prof: String, code: String): String {
             "CHRISTINE, JAMES" -> "JAMES, CHRISTINE" // probably
             "DELUCA, LITKEY", "DELUCCA-LITKEY, A" -> "DELUCA-LITKEY, AMY"
             "VANALST, D" -> "VAN ALST, D"
+            else -> prof
+        }
+
+        "50:014" -> when (prof) {
+            "IBN-ZIYAD, MAHDI", "IBN-ZIYAD" -> "ZIYAD, MAHDI" // 50:840
+            "HAZZARD, KATRINA" -> "HAZZARD-DONALD, KATRINA" // 50:070, 50:920
+            else -> prof
+        }
+
+        "50:070" -> when (prof) {
+            "COE, CATI" -> "COE, CATHLEEN"
+            "HAZZARD, KATRINA", "HAZZARD" -> "HAZZARD-DONALD, KATRINA" // 50:014, 50:920
+            else -> prof
+        }
+
+        "50:080" -> when (prof) {
+            "DEMARAY, PROF" -> "DEMARAY, ELIZABETH"
+            "ESPIRITU, ALAN" -> "ESPIRITU, ALLAN" // 50:082
+            "BRUCE, GARRITY" -> "GARRITY, BRUCE"
+            "FLIBERT, JEFFREY", "FILBERT, JEFFERY" -> "FILBERT, JEFFREY"
+            "JOHNSON, TONY", "JOHNSON, HAMILITON" -> "JOHNSON, HAMILTON"
+            "LEDONNE, NICK" -> "LEDONNE, NICHOLAS"
+            "LEECH, KATIE" -> "LEECH, MARY" // probably
+            "SHPANIN, STANISLAW" -> "SHPANIN, STANISLAV"
+            "SYMERSKI, ANTHONY" -> "SMYRSKI, ANTHONY"
+            else -> prof
+        }
+
+        "50:082" -> when (prof) {
+            "BRUCE, GARRITY" -> "GARRITY, BRUCE" // 50:080
+            "HEITLER, GABY" -> "HEITLER, GABRIELLE"
+            "PILLIOD, ELIZABETH" -> "PILLIOD, BETH"
+            "RODRIGUEZ-LAWSON" -> "RODRIGUEZ, ANABELLE"
+            else -> prof
+        }
+//
+        "50:090" -> when (prof) {
+            "CHERYL, HALLMAN" -> "HALLMAN, CHERYL" // 50:202
+            else -> prof
+        }
+
+        "50:100" -> when (prof) {
+            "GAMBS, JERRY" -> "GAMBS, GERARD"
+            else -> prof
+        }
+
+        "50:120" -> when (prof) {
+            "ABDUS-SABOUR, ISHMAIL" -> "ABDUS-SABOOR, ISHMAIL"
+            "BORDEN, ZACK" -> "BORDEN, ZACHARY"
+            "GONZALEZ, ANGELICA", "GONZALEZ, A" -> "GONZALEZ, GAJARDO"
+            "MALCOLM, KATIE" -> "MALCOLM, KATALIN"
+            "OBERLE-KILIC, JENNIFER" -> "OBERLE, JENNIFER"
+            "SPRINGER, RUTH" -> "SPORER, RUTH"
+            else -> prof
+        }
+
+        "50:160" -> when (prof) {
+            "ARBUCKLE" -> "ARBUCKLE-KEIL, GEORGIA"
+            "CHERFANE" -> "SOLIMEO-CHERFANE, RENEE"
+            "FAJGIER, CHUCK" -> "FAJGIER, CHARLES"
+            "SALAS" -> "SALAS-DE LA CRUZ, DAVID"
+            else -> prof
+        }
+
+        "50:163" -> when (prof) {
+            "LU, WEHNUA" -> "LU, WENHUA"
+            "LUPOLD" -> "LUPOLD-KEILEN, EVA"
+            else -> prof
+        }
+
+        "50:198" -> when (prof) {
+            "EGAN, DENNIS" -> "EGEN, DENNIS"
+            "GANDHI, TEJAS" -> "GANDHI, RAJIV" // probably
+            "PATARCITY, JOE" -> "PATARCITY, JOSEPH"
+            "RAMASWAMI, SUNEETS" -> "RAMASWAMI, SUNEETA"
+            else -> prof
+        }
+
+        "50:202" -> when (prof) {
+            "GILLIARD-MATTH" -> "GILLIARD-MATTHEWS"
+            "CHERYL, HALLMAN" -> "HALLMAN, CHERYL" // 05:090
+            else -> prof
+        }
+
+        "50:209" -> when (prof) {
+            "BROWN, JB1343" -> "BROWN, JAMES"
+            "EMMONS, RAEMMONS" -> "EMMONS, ROBERT"
+            else -> prof
+        }
+
+        "50:220" -> when (prof) {
+            "EMARA, NOMA", "EMARA, NOAH" -> "EMARA, NOHA"
+            "MA, JIMPENG" -> "MA, JINPENG"
+            "MORELLI, MICHEAL", "MORELLI, MICHALL", "MORELLI, MICHAELI" -> "MORELLI, MICHAEL"
+            "PASCALE, GUY" -> "PASCALE, GAETANO" // probably
+            "YAMADA, JETSUJI" -> "YAMADA, TETSUJI"
+            else -> prof
+        }
+
+        "50:350" -> when (prof) {
+            "BARBARESE, JT" -> "BARBARESE, JOSEPH"
+            "BLACKFORD, MOLLY" -> "BLACKFORD, HOLLY"
+            "GUEDON, CHRISTINE", "GUEDONDECON, CHRISTINE", "GUEDONDECONCI, CHRISTINE", "GUEDONDECONCINI, CHRISTINE" -> "GUEDON DE CONCINI, CHRISTINE" // 50:352
+            "HABIB, MA", "HABIB, M" -> "HABIB, RAFEY" // 50:525
+            "HOSTETTER, ARRON" -> "HOSTETTER, AARON"
+            "MOOREHEAD" -> "MOORHEAD, DANIEL"
+            "STALNAKER, MATTEW" -> "STALNAKER, MATTHEW"
+            "TIMOTHY, MARTIN" -> "MARTIN, TIMOTHY"
+            else -> prof
+        }
+
+        "50:352" -> when (prof) {
+            "ABDUL, JABBAAR" -> "ABDULJABBAAR, MALIK"
+            "GUEDON, CHRISTINE", "GUEDONDECON, CHRISTINE", "GUEDONDECONCI, CHRISTINE", "GUEDONDECONCINI, CHRISTINE" -> "GUEDON DE CONCINI, CHRISTINE" // 50:350
+            else -> prof
+        }
+
+        "50:354" -> when (prof) {
+            "MOKHBERI, EMUP", "MOKBERI, EMUD" -> "MOKHBERI, EMUD"
+            "MATTHEW, SORRENTO" -> "SORRENTO, MATTHEW"
+            else -> prof
+        }
+
+        "50:499" -> when (prof) {
+            "DUNEAV, JAMIE" -> "DUNAEV, JAMIE"
+            else -> prof
+        }
+
+        "50:512" -> when (prof) {
+            "WOLOSON, WENDF" -> "WOLOSON, WENDY"
+            else -> prof
+        }
+
+        "50:525" -> when (prof) {
+            "HABIB, MA" -> "HABIB, RAFEY" // 50:350
+            "WESTMAN, LEANN" -> "WESTMAN, LEEANN"
+            else -> prof
+        }
+
+        "50:640" -> when (prof) {
+            "DONAHU" -> "DONAHUE, S" // probably
+            "HERRERA, H", "HERRERA" -> "HERRERA-GUZMAN, HAYDEE"
+            "LESHEN, SARA" -> "LESHEN-GROSS, SARA"
+            "SANCHIRICO, NICHOLAS" -> "SANCHIRICO, NICK"
+            else -> prof
+        }
+
+        "50:700" -> when (prof) {
+            "ANTONNACCI, JARRED", "JARRED, ANTONACCI" -> "ANTONACCI, JARRED"
+            "ARNARSON, STEPHAN", "ARNARSON, STEEAN" -> "ARNARSON, STEFAN"
+            "BAIRD, JALIANNE" -> "BAIRD, JULIANNE" // 50:701 kinda
+            "LAURIE, LALLY" -> "LALLY, LAURIE"
+            "MOLK, DAVID" -> "MOLK, DAVE"
+            "ERIC, POLACK" -> "POLACK, ERIC" // 50:701
+            "JULIA, ZAVADSKY" -> "ZAVADSKY, JULIA" // 50:701 kinda
+            else -> prof
+        }
+
+        "50:701" -> when (prof) {
+            "BAIRD, JULIANNA" -> "BAIRD, JULIANNE" // 50:700 kinda
+            "CIULEIATANASIU, LENUTA" -> "CIULEI, LENUTA"
+            "POLACK, ERIK" -> "POLACK, ERIC" // 50:700
+            "ZAVADSKY, JYLIA" -> "ZAVADSKY, JULIA" // 50:700 kinda
+            else -> prof
+        }
+
+        "50:730" -> when (prof) {
+            "BETZ, MARGERET" -> "BETZ, MARGARET"
+            "SACKS, BRIAN" -> "SACKS, BRYAN"
+            "PHILLIPS, YOUNG" -> "YOUNG, PHILLIPS"
+            else -> prof
+        }
+
+        "50:750" -> when (prof) {
+            "BRANNIGAN, GRACE" -> "BRANNIGAN, JESSICA"
+            "GRIEPENBERG, JULIANNE", "GRIEPENBURG, JULIANNA" -> "GRIEPENBURG, JULIANNE"
+            "SHEINBERG, MICHAEL" -> "SCHEINBERG, MICHAEL"
+            "TROUT, COREY" -> "TROUT, CORY" // probably
+            else -> prof
+        }
+
+        "50:790" -> when (prof) {
+            "AYSCUE, STEPHEN" -> "AYSCUE, STEVE"
+            "BARTCH, CATHY" -> "BARTCH, CATHERINE"
+            "BOWERS, MELONIE" -> "BOWERS, MELANIE"
+            "LAMBERT, KATHERYN", "KATHRYN, LAMBERT" -> "LAMBERT, KATHRYN"
+            "MACKIEWICZWOLF, WOJTEK", "MACKIEWICZ-WOLFE, WOJIECH", "MACKIEWICZ-WOLFE, WOJCIE", "MACKIEWICZ-WOLFE, WOJCIECH" -> "MACKIEWICZ-WOLFE, WOJTEK"
+            "RAYMOND, MASSI" -> "MASSI, RAYMOND"
+            "SHAHEEN, AYUBI" -> "AYUBI, SHAHEEN"
+            "SHAMES, SHAVNA" -> "SHAMES, SHAUNA"
+            else -> prof
+        }
+
+        "50:830" -> when (prof) {
+            "ALLENDORFER, KENNETH" -> "ALLENDOERFER, KENNETH"
+            "BERNARDINI, STEPHAN" -> "BERNARDINI, STEPHEN"
+            "CAVANAUGH, COURTNAY" -> "CAVANAUGH, COURTENAY"
+            "CHAN, WAGNE" -> "CHAN, WAYNE"
+            "CORRY, ANJANNETT" -> "CORRY, ANJENNETT"
+            "DIXON, MICHELLE" -> "DIXON, PALMER"
+            "DUFFY, SEAN" -> "DUFFY, EDWARD" // or maybe flipped?
+            "LATU, IONA" -> "LATU, IOANA"
+            "GODOFSKY, LEAVY", "LEAVY, BARBARA" -> "GODOFSKYLEAVY, BARBARA"
+            "MELUSO, ANGELA" -> "MELUSO-SCAFIDI, ANGELA"
+            "ODONNELL, ALEXANRA", "ODONNELI, ALEXANDRA" -> "O'DONNELL, ALEXANDRA"
+            "PAPPAS, ZISSUS" -> "PAPPAS, ZISSIS"
+            "ELENA, RAGUSA" -> "RAGUSA, ELENA"
+            "VANDERWEL, ROBREHT", "VANDERWEL, ROBRECHT" -> "VAN DER WEL, ROBRECHT"
+            else -> prof
+        }
+
+        "50:840" -> when (prof) {
+            "GILMORE-CLOUGH, KIPP" -> "GILMORE-CLOUGH, GREGORY"
+            "GREG, SALYER" -> "SALYER, GREG"
+            "IBN-ZIYAD, MAHDI" -> "ZIYAD, MAHDI" // 50:014
+            else -> prof
+        }
+
+        "50:910" -> when (prof) {
+            "CANDELARIA, E", "ELSA, CANDELARIO" -> "CANDELARIO, ELSA"
+            "CALAMERE, M" -> "CARLAMERE, MICHELLE"
+            "MANAHAN, MOORE" -> "MOORE, MANAHAN"
+            "MARLA, BLUNT-CARTER" -> "BLUNT-CARTER, MARLA"
+            "LORI, SCHLOSSER" -> "SCHLOSSER, LORI"
+            "SECCHUITTI, J", "SECCHUTTI, J", "JUDITH, SECCHIUTTI" -> "SECCHIUTTI, JUDITH"
+            "STANGLIANO, R", "RICHARD, STAGLIANO" -> "STAGLIANO, RICHARD"
+            "SUSAN, HIGGINS" -> "HIGGINS, SUSAN"
+            "TAYLOR-BASHSHA, J" -> "TAYLOR-BASHSHAR, JESSICA"
+            else -> prof
+        }
+
+        "50:920" -> when (prof) {
+            "COHEN, KALLAN" -> "COHEN, JOANNA"
+            "HAZZARD, KATRINA", "HAZZARD" -> "HAZZARD-DONALD, KATRINA" // 50:014, 50:014
+            "HERRSCRAFT-ECKM, BRYN", "HERRSCHAFT" -> "HERRSCHAFT-ECKMAN, BRYN"
+            else -> prof
+        }
+
+        "50:940" -> when (prof) {
+            "CASTILLIO, MAURICIO" -> "CASTILLO, MAURICIO"
+            "MOSSVELASCO, DONIE", "VELASCO, DANIE" -> "MOSS-VELASCO, DANIE"
+            "PEREZ, CORTES" -> "PEREZ-CORTES, SILVIA"
+            "PROSPERO, GARCIA" -> "GARCIA, PROSPERO"
+            "RODGERS, MADISON" -> "ROGERS, MADISON"
+            "SANTOS, LORENA" -> "SANTOS, QUINONES"
+            else -> prof
+        }
+
+        "50:964" -> when (prof) {
+            "ANN, HEIDELBERG" -> "HEIDELBERG, ANN"
+            "ONEILL, KRISTIN", "KRISTIN, O'NEIL", "O'NEILL" -> "O'NEIL, KRISTIN"
+            "PARKS" -> "PARK, DEBRA"
+            "PIDGEON, N" -> "WERNER-PIDGEON, NICOLE"
+            "JOHN, ROTHWELL" -> "ROTHWELL, JOHN"
+            "SANTO, TOM" -> "SANTO, THOMAS"
+            "SARA, BECKER" -> "BECKER, SARA"
+            else -> prof
+        }
+
+        "50:965" -> when (prof) {
+            "CHACON, DOMINIC" -> "CHACON, JOSE"
+            "ELLIOT, KENNETH" -> "ELLIOTT, KENNETH"
+            "FORBES-ERICKSO" -> "FORBES-ERICKSON, DENISE"
+            "HIIBLE, MILLIE" -> "HIIBEL, MILLIE"
+            else -> prof
+        }
+
+        "50:989" -> when (prof) {
+            "BARBEE, YOW" -> "BARBEEYOW, GWENDOLYN"
+            "BROWN, JOHN" -> "BROWN, JAMES" // probably
             else -> prof
         }
 
