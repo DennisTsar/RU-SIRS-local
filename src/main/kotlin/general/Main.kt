@@ -32,7 +32,7 @@ fun main(args: Array<String>) {
     }
     if ("-updateByProf" in args) {
         generateEntriesByProfMap(9)
-        generateCompleteProfListBySchool("data-9-by-prof")
+        generateCompleteProfListBySchool("json-data/data-9-by-prof")
     }
 }
 
@@ -139,7 +139,9 @@ fun generateLatestProfCourseMappings(
             keySelector = { it.courseString },
             valueTransform = { courseListing ->
                 courseListing.sections.flatMap { section ->
-                    section.instructors.map { it.name }
+                    // instructorsText seems to be updated sooner than instructors?
+                    section.instructors.map { it.name } +
+                            section.instructorsText.split(";").map { it.trim() }
                 }
             }
         ).mapValues { (key, value) ->
@@ -147,11 +149,15 @@ fun generateLatestProfCourseMappings(
                 val (school, dept, _) = key.split(":")
                 entries[school]?.get(dept)
             } ?: return@mapValues emptyList()
+
             value.flatten().toSet().mapNotNull { originalName ->
-                val name = originalName.run {
-                    if (" " in this && "," !in this) replace(" ", ", ")
-                    else this
-                }
+                val name = originalName
+                    .run { // add comma if missing between first + last name
+                        if (" " in this && "," !in this) replace(" ", ", ")
+                        else this
+                    }.replace(".", "")
+                    .let { manualNameAdjustment(it, key.substringBeforeLast(":")) }
+
                 existingNames.singleOrNull { it.startsWith(name) }
                     ?: existingNames.singleOrNull { it == name.take(name.indexOf(",") + 3) }
                     ?: existingNames.singleOrNull { it.startsWith(name.substringBefore(",")) }
