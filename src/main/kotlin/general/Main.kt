@@ -197,6 +197,20 @@ fun EntriesByProfMap.printPossibleNameAdjustments(printURL: Boolean = true) {
         }.ifEmpty { null }?.let { filtered ->
             println("\n\"$school:$dept\" -> when (prof) {")
             filtered.sortedBy { it.second }.forEach { (a, b) ->
+
+//                fun List<Entry>.printExtra() {
+//                    with(map { it.semester }) { println("${min()} -> ${max()}") }
+//                    println(map { it.course }.toSet().sorted())
+//                }
+//                profMap[a]?.printExtra()
+//                profMap[b]?.printExtra()
+
+//                println("***************")
+//                (profMap[a]!!+profMap[b]!!)
+//                    .sortedWith(compareBy({ it.semester }, { it.course }))
+//                    .forEach { println("\t${it.formatFullName()} ${it.semester} ${it.course}") }
+//                println("***************")
+
                 print("\t\"$b\" -> \"$a\"")
                 val common = b.zip(a).takeWhile { (x, y) -> x == y }
                     .map { it.first }.joinToString("").split(",")[0]
