@@ -102,25 +102,24 @@ fun parseEntriesFromSIRS(
     semesters: List<Semester> = DefaultParams.sirsRange,
     extraEntries: EntriesMap = emptyMap(), // for old entries no longer in SIRS
 ) {
-    schoolDeptsMap.forEach { (school, value) ->
+    schoolDeptsMap.forEach { (schoolCode, school) ->
         // ensures depts only present in extraEntries are preserved
-        val extra = extraEntries[school]?.keys.orEmpty()
-        (value.depts + extra).map { dept ->
-            //Wanted to have "launch" here for async but that breaks Rutgers servers
+        val extraDepts = extraEntries[schoolCode]?.keys.orEmpty()
+        (school.depts + extraDepts).forEach depts@{ dept ->
+            val oldEntries = extraEntries[schoolCode]?.get(dept).orEmpty()
+            // Wanted to make this more async but that breaks Rutgers servers
             val entries = runBlocking {
-                semesters.pmap { sirsSource.getEntriesByDeptOrCourse(it, school, dept) }
-            }.flatten().plus(extraEntries[school]?.get(dept).orEmpty()).ifEmpty { return@map null }
-            dept to entries
-        }.filterNotNull()
-            .groupBy({ it.first }, { it.second })
-            .mapValues { it.value.flatten() }
-            .forEach { (dept, entries) ->
-                globalSetOfQs.addAll(entries.map { it.questions.orEmpty() }.flatten())
-                stringForFile(entries)?.let {
-                    val file = makeFileAndDir("$writeDir/$school/${dept.replace(":", "sc")}.json")
-                    file.writeText(it)
-                }
+                semesters.pmap { sirsSource.getEntriesByDeptOrCourse(it, schoolCode, dept) }
+            }.flatten() + oldEntries
+
+            if (entries.isEmpty()) return@depts
+
+            globalSetOfQs.addAll(entries.mapNotNull { it.questions }.flatten())
+            stringForFile(entries)?.let {
+                val file = makeFileAndDir("$writeDir/$schoolCode/${dept.replace(":", "sc")}.json")
+                file.writeText(it)
             }
+        }
     }
 }
 
@@ -132,7 +131,7 @@ fun generateLatestProfCourseMappings(
     val localSource = LocalSource()
     val socSource = SOCSource()
 
-    val entries = localSource.getAllEntriesByProf().mapEachDept { _, _, map -> map.keys }
+    val profsByDept = localSource.getAllEntriesByProf().mapEachDept { _, _, map -> map.keys }
 
     val courseToProfs = runBlocking { campuses.flatMap { socSource.getCourses(semester, it) } }
         .groupBy(
@@ -147,7 +146,7 @@ fun generateLatestProfCourseMappings(
         ).mapValues { (key, value) ->
             val existingNames = run {
                 val (school, dept, _) = key.split(":")
-                entries[school]?.get(dept)
+                profsByDept[school]?.get(dept)
             } ?: return@mapValues emptyList()
 
             value.flatten().toSet().mapNotNull { originalName ->
@@ -177,7 +176,9 @@ fun generateLatestProfCourseMappings(
             }
     }
 
-    val totalSize = finalMap.map { it.value.map { it.value.size } }.flatten().sum()
+    val totalSize = finalMap.values.sumOf { subMap ->
+        subMap.values.sumOf { it.size }
+    }
     println("${totalSize - courseToProfs.size} profs with courses")
 
     writeDir?.let { finalMap.writeToDir(it) }
