@@ -18,6 +18,7 @@ import mapEachDept
 import misc.makeFileAndDir
 import misc.similarity
 import pmap
+import prev
 import remote.EntriesSource
 import remote.sources.LocalSource
 import remote.sources.SIRSSource
@@ -73,11 +74,20 @@ fun generateEntriesByProfMap(folderNum: Int, writeToDir: Boolean = true): Entrie
 
 fun generateCourseNameMappings(
     socSource: SOCSource = SOCSource(),
-    semester: Semester = DefaultParams.semester,
+    semesters: List<Semester> = listOf(
+        DefaultParams.semester.prev(3),
+        DefaultParams.semester.prev(2),
+        DefaultParams.semester.prev(),
+        DefaultParams.semester
+    ),
     writeDir: String? = "json-data/extra-data/courseNames",
 ): SchoolDeptsMap<Map<String, String>> {
     return runBlocking {
-        Campus.values().toList().flatMap { socSource.getCourses(semester, it) }
+        Campus.values().toList().flatMap { campus ->
+            semesters.flatMap { semester ->
+                socSource.getCourses(semester, campus)
+            }
+        }
     }.map { it.courseString to it.title }
         .groupBy { it.first.split(":")[0] } // first split by school
         .mapValues { (_, pairs) ->
@@ -85,6 +95,7 @@ fun generateCourseNameMappings(
                 .groupBy { it.first.split(":")[1] } // then by dept
                 .mapValues { (_, pairs) ->
                     pairs.associate { it.first.split(":")[2] to it.second }
+                        .toSortedMap().toMap()
                 }
         }.also { map ->
             writeDir?.let { map.writeToDir(it, writeSchoolMap = false) }
