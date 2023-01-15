@@ -87,7 +87,7 @@ fun generateCourseNameMappings(
                     pairs.associate { it.first.split(":")[2] to it.second }
                 }
         }.also { map ->
-            writeDir?.let { map.writeToDir(it) }
+            writeDir?.let { map.writeToDir(it, writeSchoolMap = false) }
         }
 }
 
