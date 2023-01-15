@@ -74,18 +74,15 @@ fun generateEntriesByProfMap(folderNum: Int, writeToDir: Boolean = true): Entrie
 
 fun generateCourseNameMappings(
     socSource: SOCSource = SOCSource(),
-    semesters: List<Semester> = listOf(
-        DefaultParams.semester.prev(3),
-        DefaultParams.semester.prev(2),
-        DefaultParams.semester.prev(),
-        DefaultParams.semester
-    ),
+    latestSemester: Semester = DefaultParams.semester,
+    semestersBack: Int = 4,
     writeDir: String? = "json-data/extra-data/courseNames",
 ): SchoolDeptsMap<Map<String, String>> {
+    if (semestersBack < 1) throw IllegalArgumentException("semestersBack must be >= 1")
     return runBlocking {
-        Campus.values().toList().flatMap { campus ->
-            semesters.flatMap { semester ->
-                socSource.getCourses(semester, campus)
+        Campus.values().flatMap { campus ->
+            (semestersBack - 1 downTo 0).flatMap {
+                socSource.getCourses(latestSemester.prev(it), campus)
             }
         }
     }.map { it.courseString to it.title }
