@@ -79,6 +79,17 @@ class LocalSource(
     override suspend fun getTeachingData(school: String, dept: String, term: String): Map<String, List<String>> =
         getTeachingDataLocal(school, dept, term)
 
+    fun getCourseNamesLocal(school: String, dept: String): Map<String, String> {
+        return try {
+            Json.decodeFromString(File("$extraJsonDir/courseNames/$school/$dept.json").readText())
+        } catch (e: FileNotFoundException) {
+            emptyMap()
+        }
+    }
+
+    override suspend fun getCourseNames(school: String, dept: String): Map<String, String> =
+        getCourseNamesLocal(school, dept)
+
     fun getDeptMapLocal(): Map<String, String> =
         Json.decodeFromString(File("$extraJsonDir/deptNameMap.json").readText())
 
