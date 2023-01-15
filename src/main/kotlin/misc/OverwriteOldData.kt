@@ -5,12 +5,12 @@ import data.old_data.EntryOld1
 import data.old_data.EntryOld2
 import data.old_data.EntryOld3
 import general.writeToDir
-import remote.sources.LocalSource
+import remote.sources.LocalFileSource
 
 
 inline fun <reified T> overwriteDir(
     dirNum: Int,
-    localSource: LocalSource,
+    localSource: LocalFileSource,
     toEntry: T.() -> Entry,
 ) {
     localSource.getAllEntries<T>("old-json/json-data-$dirNum/")
@@ -22,7 +22,7 @@ inline fun <reified T> overwriteDir(
 }
 
 fun completeOverwrite(overwriteRange: List<Int> = (1..6).toList()) {
-    val localSource = LocalSource()
+    val localSource = LocalFileSource()
     for (i in overwriteRange) {
         when (i) {
             1 -> overwriteDir<EntryOld1>(i, localSource) {

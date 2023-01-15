@@ -2,10 +2,10 @@ package misc
 
 import EntriesMap
 import Entry
-import remote.sources.LocalSource
+import remote.sources.LocalFileSource
 
 fun validateMapOfEntries(
-    map1: EntriesMap = LocalSource().getAllEntries(),
+    map1: EntriesMap = LocalFileSource().getAllEntries(),
     map2: EntriesMap,
 ) {
     map1.forEach { (k, _) ->
@@ -24,7 +24,7 @@ fun validateMapOfEntries(
 }
 
 fun compareDataDirs(dir1: String, dir2: String, compareSizes: Boolean = true) {
-    val localSource = LocalSource()
+    val localSource = LocalFileSource()
     val map1 = localSource.getAllEntries<Entry>(dir1)
     val map2 = localSource.getAllEntries<Entry>(dir2)
 

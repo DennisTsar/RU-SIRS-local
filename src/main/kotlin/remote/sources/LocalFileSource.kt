@@ -8,21 +8,15 @@ import School
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import misc.walkDirectory
-import remote.EntriesFromFileSource
-import remote.ExtraDataSource
-import remote.SchoolMapSource
 import java.io.File
 import java.io.FileNotFoundException
 
-class LocalSource(
+class LocalFileSource(
     val mainJsonDir: String = "json-data/data-9",
     private val extraJsonDir: String = "json-data/extra-data",
-) : EntriesFromFileSource, SchoolMapSource, ExtraDataSource {
-    fun getEntriesLocal(school: String, dept: String, folderNum: Int): List<Entry> =
+) : NonBlockingSource {
+    override fun getEntriesLocal(school: String, dept: String, folderNum: Int): List<Entry> =
         Json.decodeFromString(File("json-data/data-$folderNum/$school/$dept.json").readText())
-
-    override suspend fun getEntries(school: String, dept: String, folderNum: Int): List<Entry> =
-        getEntriesLocal(school, dept, folderNum)
 
     inline fun <reified T> getAllEntries(readDir: String = mainJsonDir): Map<String, Map<String, List<T>>> {
         return File(readDir).walkDirectory().associate { file ->
@@ -33,11 +27,8 @@ class LocalSource(
         }.filterValues { it.isNotEmpty() }
     }
 
-    fun getEntriesByProfLocal(school: String, dept: String, folderNum: Int): EntriesByProf =
+    override fun getEntriesByProfLocal(school: String, dept: String, folderNum: Int): EntriesByProf =
         Json.decodeFromString(File("json-data/data-$folderNum-by-prof/$school/$dept.json").readText())
-
-    override suspend fun getEntriesByProf(school: String, dept: String, folderNum: Int): EntriesByProf =
-        getEntriesByProfLocal(school, dept, folderNum)
 
     fun getAllEntriesByProf(readDir: String = "$mainJsonDir-by-prof"): EntriesByProfMap {
         return File(readDir).walkDirectory().associate { file ->
@@ -48,27 +39,18 @@ class LocalSource(
         }.filterValues { it.isNotEmpty() }
     }
 
-    fun getSchoolMapLocal(): Map<String, School> =
+    override fun getSchoolMapLocal(): Map<String, School> =
         Json.decodeFromString(File("$extraJsonDir/schoolMap.json").readText())
-
-    override suspend fun getSchoolMap(): Map<String, School> = getSchoolMapLocal()
 
     @Deprecated(
         "Data is now stored in separate files by dept. This function is kept to get F22 data.",
         replaceWith = ReplaceWith("getTeachingDataLocal"),
     )
-    fun getLatestInstructorsLocal(term: String): Map<String, List<String>> =
+    override fun getLatestInstructorsLocal(term: String): Map<String, List<String>> =
         Json.decodeFromString(File("$extraJsonDir/$term-instructors.json").readText())
 
-    @Suppress("DEPRECATION")
-    @Deprecated(
-        "Data is now stored in separate files by dept. This function is kept to get F22 data.",
-        replaceWith = ReplaceWith("getTeachingData"),
-    )
-    override suspend fun getLatestInstructors(term: String): Map<String, List<String>> =
-        getLatestInstructorsLocal(term)
 
-    fun getTeachingDataLocal(school: String, dept: String, term: String): Map<String, List<String>> {
+    override fun getTeachingDataLocal(school: String, dept: String, term: String): Map<String, List<String>> {
         return try {
             Json.decodeFromString(File("$extraJsonDir/$term-instructors/$school/$dept.json").readText())
         } catch (e: FileNotFoundException) {
@@ -76,10 +58,7 @@ class LocalSource(
         }
     }
 
-    override suspend fun getTeachingData(school: String, dept: String, term: String): Map<String, List<String>> =
-        getTeachingDataLocal(school, dept, term)
-
-    fun getCourseNamesLocal(school: String, dept: String): Map<String, String> {
+    override fun getCourseNamesLocal(school: String, dept: String): Map<String, String> {
         return try {
             Json.decodeFromString(File("$extraJsonDir/courseNames/$school/$dept.json").readText())
         } catch (e: FileNotFoundException) {
@@ -87,21 +66,13 @@ class LocalSource(
         }
     }
 
-    override suspend fun getCourseNames(school: String, dept: String): Map<String, String> =
-        getCourseNamesLocal(school, dept)
-
-    fun getDeptMapLocal(): Map<String, String> =
+    override fun getDeptMapLocal(): Map<String, String> =
         Json.decodeFromString(File("$extraJsonDir/deptNameMap.json").readText())
 
-    override suspend fun getDeptMap(): Map<String, String> = getDeptMapLocal()
-
-    fun getAllInstructorsLocal(dir: String): Map<String, List<Instructor>> =
+    override fun getAllInstructorsLocal(dir: String): Map<String, List<Instructor>> =
         Json.decodeFromString(File("json-data/$dir/allInstructors.json").readText())
 
-    override suspend fun getAllInstructors(dir: String): Map<String, List<Instructor>> = getAllInstructorsLocal(dir)
 
-    fun getSchoolMapLocal(dataDir: String): Map<String, School> =
+    override fun getSchoolMapLocal(dataDir: String): Map<String, School> =
         Json.decodeFromString(File("json-data/$dataDir/schoolMap.json").readText())
-
-    override suspend fun getSchoolMap(dataDir: String): Map<String, School> = getSchoolMapLocal(dataDir)
 }

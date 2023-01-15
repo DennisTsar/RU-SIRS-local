@@ -20,7 +20,7 @@ import misc.similarity
 import pmap
 import prev
 import remote.EntriesSource
-import remote.sources.LocalSource
+import remote.sources.LocalFileSource
 import remote.sources.SIRSSource
 import remote.sources.SOCSource
 import java.io.File
@@ -38,7 +38,7 @@ fun main(args: Array<String>) {
 }
 
 fun generateCompleteProfListBySchool(dataDir: String, writeToDir: Boolean = true): Map<String, List<Instructor>> {
-    val profList = LocalSource().getAllEntriesByProf(dataDir)
+    val profList = LocalFileSource().getAllEntriesByProf(dataDir)
         .flatMapEachDept { school, dept, entriesByProf ->
             entriesByProf.map { (name, entries) ->
                 Instructor(name, school, dept, entries.last().semester) // entries are sorted so last() works
@@ -55,7 +55,7 @@ fun generateCompleteProfListBySchool(dataDir: String, writeToDir: Boolean = true
 fun generateEntriesByProfMap(folderNum: Int, writeToDir: Boolean = true): EntriesByProfMap {
     if (!File("json-data/data-$folderNum-by-prof").deleteRecursively())
         throw Exception("Failed to delete json-data/data-$folderNum-by-prof")
-    val localSource = LocalSource()
+    val localSource = LocalFileSource()
     val schoolMap = localSource.getSchoolMapLocal()
     return localSource.getAllEntries<Entry>("json-data/data-$folderNum")
         .toEntriesByProfMap()
@@ -156,7 +156,7 @@ fun generateLatestProfCourseMappings(
     campuses: List<Campus> = Campus.values().toList(),
     writeDir: String? = "json-data/extra-data/S23-teaching",
 ): SchoolDeptsMap<Map<String, List<String>>> {
-    val localSource = LocalSource()
+    val localSource = LocalFileSource()
     val socSource = SOCSource()
 
     val profsByDept = localSource.getAllEntriesByProf().mapEachDept { _, _, map -> map.keys }
