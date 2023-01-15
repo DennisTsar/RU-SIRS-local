@@ -71,6 +71,26 @@ fun generateEntriesByProfMap(folderNum: Int, writeToDir: Boolean = true): Entrie
         }.also { if (writeToDir) it.writeToDir("json-data/data-$folderNum-by-prof") }
 }
 
+fun generateCourseNameMappings(
+    socSource: SOCSource = SOCSource(),
+    semester: Semester = DefaultParams.semester,
+    writeDir: String? = "json-data/extra-data/courseNames",
+): SchoolDeptsMap<Map<String, String>> {
+    return runBlocking {
+        Campus.values().toList().flatMap { socSource.getCourses(semester, it) }
+    }.map { it.courseString to it.title }
+        .groupBy { it.first.split(":")[0] } // first split by school
+        .mapValues { (_, pairs) ->
+            pairs
+                .groupBy { it.first.split(":")[1] } // then by dept
+                .mapValues { (_, pairs) ->
+                    pairs.associate { it.first.split(":")[2] to it.second }
+                }
+        }.also { map ->
+            writeDir?.let { map.writeToDir(it) }
+        }
+}
+
 //To get CSV, pass ::csvFromEntries, to get JSONs, { Json.encodeToString(this) }
 fun parseDeptsFromSIRS(
     entriesSource: EntriesSource,
