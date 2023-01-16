@@ -186,8 +186,11 @@ fun generateLatestProfCourseMappings(
                     .let { manualNameAdjustment(it, key.substringBeforeLast(":")) }
 
                 existingNames.singleOrNull { it.startsWith(name) }
-                    ?: existingNames.singleOrNull { it == name.take(name.indexOf(",") + 3) }
-                    ?: existingNames.singleOrNull { it.startsWith(name.substringBefore(",")) }
+                    ?: existingNames.singleOrNull {
+                        it == name.take(name.indexOf(",") + 3) // for "Last, Initial"
+                    } ?: existingNames.singleOrNull {
+                        it.substringBefore(",") == name.substringBefore(",")
+                    }
             }.sorted()
         }.filterValues { it.isNotEmpty() }
         .also { println("${it.size} courses with profs, ${it.count { (_, v) -> v.size > 1 }} with 2+ profs") }
