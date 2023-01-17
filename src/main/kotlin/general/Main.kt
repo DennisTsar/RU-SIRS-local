@@ -35,7 +35,6 @@ fun main(args: Array<String>) {
         generateEntriesByProfMap(9)
         generateCompleteProfListBySchool("json-data/data-9-by-prof")
     }
-    generateLatestProfCourseMappings()
 }
 
 fun generateCompleteProfListBySchool(dataDir: String, writeToDir: Boolean = true): Map<String, List<Instructor>> {
