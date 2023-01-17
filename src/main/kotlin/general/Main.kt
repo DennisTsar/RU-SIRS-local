@@ -35,6 +35,7 @@ fun main(args: Array<String>) {
         generateEntriesByProfMap(9)
         generateCompleteProfListBySchool("json-data/data-9-by-prof")
     }
+    generateLatestProfCourseMappings()
 }
 
 fun generateCompleteProfListBySchool(dataDir: String, writeToDir: Boolean = true): Map<String, List<Instructor>> {
@@ -199,7 +200,9 @@ fun generateLatestProfCourseMappings(
         localSource.getSchoolMapLocal().values
             .generateSchoolMap { school, dept ->
                 // not very efficient to do this for every dept, but simple and still quick
-                val filteredMap = courseToProfs.filterKeys { it.startsWith("$school:$dept:") }
+                val filteredMap = courseToProfs
+                    .filterKeys { it.startsWith("$school:$dept:") }
+                    .mapKeys { it.key.takeLast(3) }
                 val profToCourses = filteredMap.flatMap { (course, profs) ->
                     profs.map { it to course }
                 }.groupBy(keySelector = { it.first }, valueTransform = { it.second })
