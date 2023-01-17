@@ -52,7 +52,7 @@ class LocalFileSource(
 
     override fun getTeachingDataLocal(school: String, dept: String, term: String): Map<String, List<String>> {
         return try {
-            Json.decodeFromString(File("$extraJsonDir/$term-instructors/$school/$dept.json").readText())
+            Json.decodeFromString(File("$extraJsonDir/$term-teaching/$school/$dept.json").readText())
         } catch (e: FileNotFoundException) {
             emptyMap()
         }
