@@ -8,6 +8,7 @@ import School
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import misc.walkDirectory
+import remote.InstructorStats
 import java.io.File
 import java.io.FileNotFoundException
 
@@ -38,6 +39,9 @@ class LocalFileSource(
             file.nameWithoutExtension to deptMap
         }.filterValues { it.isNotEmpty() }
     }
+
+    override fun getStatsByProfLocal(school: String, dept: String): Map<String, InstructorStats> =
+        Json.decodeFromString(File("$mainJsonDir-by-prof-stats/$school/$dept.json").readText())
 
     override fun getSchoolMapLocal(): Map<String, School> =
         Json.decodeFromString(File("$extraJsonDir/schoolMap.json").readText())

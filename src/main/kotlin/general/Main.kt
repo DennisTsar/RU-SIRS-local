@@ -11,6 +11,7 @@ import Semester
 import flatMapEachDept
 import forEachDept
 import generateSchoolMap
+import getTotalRatings
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -20,6 +21,7 @@ import misc.similarity
 import pmap
 import prev
 import remote.EntriesSource
+import remote.InstructorStats
 import remote.sources.LocalFileSource
 import remote.sources.SIRSSource
 import remote.sources.SOCSource
@@ -35,6 +37,23 @@ fun main(args: Array<String>) {
         generateEntriesByProfMap(9)
         generateCompleteProfListBySchool("json-data/data-9-by-prof")
     }
+}
+
+fun generateInstructorStats(writeDir: String? = "json-data/data-9-by-prof-stats"): SchoolDeptsMap<Map<String, InstructorStats>> {
+    val localSource = LocalFileSource()
+    val allEntriesByProf = localSource.getAllEntriesByProf()
+    return allEntriesByProf.mapEachDept { _, _, map ->
+        map.mapValues { (_, allEntries) ->
+            val courseRatings = allEntries
+                .groupBy { it.course }
+                .mapValues { (_, entries) -> entries.getTotalRatings().subList(0, 9) }
+            InstructorStats(
+                lastSem = allEntries.last().semester.numValue,
+                overallStats = allEntries.getTotalRatings().subList(0, 9),
+                courseStats = courseRatings
+            )
+        }.toSortedMap().toMap() // should be already sorted but just in case
+    }.also { if (writeDir != null) it.writeToDir(writeDir) }
 }
 
 fun generateCompleteProfListBySchool(dataDir: String, writeToDir: Boolean = true): Map<String, List<Instructor>> {

@@ -6,6 +6,7 @@ import Instructor
 import School
 import remote.EntriesFromFileSource
 import remote.ExtraDataSource
+import remote.InstructorStats
 import remote.SchoolMapSource
 
 interface NonBlockingSource : EntriesFromFileSource, SchoolMapSource, ExtraDataSource {
@@ -16,6 +17,10 @@ interface NonBlockingSource : EntriesFromFileSource, SchoolMapSource, ExtraDataS
     fun getEntriesByProfLocal(school: String, dept: String, folderNum: Int): EntriesByProf
     override suspend fun getEntriesByProf(school: String, dept: String, folderNum: Int): EntriesByProf =
         getEntriesByProfLocal(school, dept, folderNum)
+
+    fun getStatsByProfLocal(school: String, dept: String): Map<String, InstructorStats>
+    override suspend fun getStatsByProf(school: String, dept: String): Map<String, InstructorStats> =
+        getStatsByProfLocal(school, dept)
 
     fun getSchoolMapLocal(): Map<String, School>
     override suspend fun getSchoolMap(): Map<String, School> = getSchoolMapLocal()
