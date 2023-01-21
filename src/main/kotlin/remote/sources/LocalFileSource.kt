@@ -5,6 +5,7 @@ import EntriesByProfMap
 import Entry
 import Instructor
 import School
+import SchoolDeptsMap
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import misc.walkDirectory
@@ -15,6 +16,7 @@ import java.io.FileNotFoundException
 class LocalFileSource(
     val mainJsonDir: String = "json-data/data-9",
     private val extraJsonDir: String = "json-data/extra-data",
+    private val baseJsonDir: String = "json-data",
 ) : NonBlockingSource {
     override fun getEntriesLocal(school: String, dept: String, folderNum: Int): List<Entry> =
         Json.decodeFromString(File("json-data/data-$folderNum/$school/$dept.json").readText())
@@ -42,6 +44,15 @@ class LocalFileSource(
 
     override fun getStatsByProfLocal(school: String, dept: String): Map<String, InstructorStats> =
         Json.decodeFromString(File("$mainJsonDir-by-prof-stats/$school/$dept.json").readText())
+
+    fun getAllStatsByProf(readDir: String = "$mainJsonDir-by-prof-stats"): SchoolDeptsMap<Map<String, InstructorStats>> {
+        return File(readDir).walkDirectory().associate { file ->
+            val deptMap = file.walkDirectory().associate {
+                it.nameWithoutExtension to Json.decodeFromString<Map<String, InstructorStats>>(it.readText())
+            }
+            file.nameWithoutExtension to deptMap
+        }.filterValues { it.isNotEmpty() }
+    }
 
     override fun getSchoolMapLocal(): Map<String, School> =
         Json.decodeFromString(File("$extraJsonDir/schoolMap.json").readText())
@@ -74,9 +85,9 @@ class LocalFileSource(
         Json.decodeFromString(File("$extraJsonDir/deptNameMap.json").readText())
 
     override fun getAllInstructorsLocal(dir: String): Map<String, List<Instructor>> =
-        Json.decodeFromString(File("json-data/$dir/allInstructors.json").readText())
+        Json.decodeFromString(File("$baseJsonDir/$dir/allInstructors.json").readText())
 
 
     override fun getSchoolMapLocal(dataDir: String): Map<String, School> =
-        Json.decodeFromString(File("json-data/$dataDir/schoolMap.json").readText())
+        Json.decodeFromString(File("$baseJsonDir/$dataDir/schoolMap.json").readText())
 }
