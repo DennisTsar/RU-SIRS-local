@@ -15,12 +15,10 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.*
 import kotlinx.serialization.json.Json
 import pmap
-import remote.EntriesSource
 import remote.RemoteApi
-import remote.SchoolMapSource
 import substringAfterBefore
 
-class SIRSSource(private val API_KEY: String) : RemoteApi, SchoolMapSource, EntriesSource {
+class SIRSSource(private val API_KEY: String) : RemoteApi {
     private val sirsClient = client.config {
         defaultRequest {
             header("Cookie", API_KEY)
@@ -146,8 +144,8 @@ class SIRSSource(private val API_KEY: String) : RemoteApi, SchoolMapSource, Entr
         return semesters.pmap { getEntriesByDeptOrCourse(it, school, dept) }.flatten()
     }
 
-    override suspend fun getSchoolMap(): Map<String, School> = getSchoolMapUsingSOC()
+    suspend fun getSchoolMap(): Map<String, School> = getSchoolMapUsingSOC()
 
-    override suspend fun getLatestEntries(school: String, dept: String): List<Entry> =
+    suspend fun getLatestEntries(school: String, dept: String): List<Entry> =
         getEntriesOverSems(school, dept)
 }

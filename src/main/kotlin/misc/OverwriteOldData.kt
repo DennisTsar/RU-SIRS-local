@@ -13,7 +13,7 @@ inline fun <reified T> overwriteDir(
     localSource: LocalFileSource,
     toEntry: T.() -> Entry,
 ) {
-    localSource.getAllEntries<T>("old-json/json-data-$dirNum/")
+    localSource.getAllGenericEntries<T>("old-json/json-data-$dirNum/")
         .mapValues { (_, deptsMap) ->
             deptsMap.mapValues { (_, oldEntries) ->
                 oldEntries.map { it.toEntry() }

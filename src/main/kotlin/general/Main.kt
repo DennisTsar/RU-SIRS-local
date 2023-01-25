@@ -5,6 +5,7 @@ import EntriesByProfMap
 import EntriesMap
 import Entry
 import Instructor
+import InstructorStats
 import School
 import SchoolDeptsMap
 import Semester
@@ -20,8 +21,6 @@ import misc.makeFileAndDir
 import misc.similarity
 import pmap
 import prev
-import remote.EntriesSource
-import remote.InstructorStats
 import remote.sources.LocalFileSource
 import remote.sources.SIRSSource
 import remote.sources.SOCSource
@@ -75,8 +74,8 @@ fun generateEntriesByProfMap(folderNum: Int, writeToDir: Boolean = true): Entrie
     if (!File("json-data/data-$folderNum-by-prof").deleteRecursively())
         throw Exception("Failed to delete json-data/data-$folderNum-by-prof")
     val localSource = LocalFileSource()
-    val schoolMap = localSource.getSchoolMapLocal()
-    return localSource.getAllEntries<Entry>("json-data/data-$folderNum")
+    val schoolMap = localSource.getSchoolMap()
+    return localSource.getAllEntries("json-data/data-$folderNum")
         .toEntriesByProfMap()
         .filterKeys { it in schoolMap.keys }
         .mapValues { (school, entries) ->
@@ -115,29 +114,6 @@ fun generateCourseNameMappings(
                 }
         }.also { map ->
             writeDir?.let { map.writeToDir(it, writeSchoolMap = false) }
-        }
-}
-
-//To get CSV, pass ::csvFromEntries, to get JSONs, { Json.encodeToString(this) }
-fun parseDeptsFromSIRS(
-    entriesSource: EntriesSource,
-    schoolMap: Map<String, School>,
-    stringForFile: List<Entry>.() -> String?,
-    writeDir: String,
-    extraEntries: EntriesMap = emptyMap(),
-) {
-    runBlocking { entriesSource.getAllLatestEntries(schoolMap.values) }
-        .addOldEntries(extraEntries)
-        .forEach { (school, deptsMap) ->
-            deptsMap.forEach dept@{ (dept, entries) ->
-                globalSetOfQs.addAll(entries.flatMap { it.questions.orEmpty() })
-                println("banana $globalSetOfQs")
-
-                stringForFile(entries)?.let {
-                    val file = makeFileAndDir("$writeDir/$school/$dept.json")
-                    file.writeText(it)
-                }
-            }
         }
 }
 
@@ -215,7 +191,7 @@ fun generateLatestProfCourseMappings(
         .also { println("${it.size} courses with profs, ${it.count { (_, v) -> v.size > 1 }} with 2+ profs") }
 
     val finalMap = runBlocking { // doesn't make network call, but generateSchoolMap is aync
-        localSource.getSchoolMapLocal().values
+        localSource.getSchoolMap().values
             .generateSchoolMap { school, dept ->
                 // not very efficient to do this for every dept, but simple and still quick
                 val filteredMap = courseToProfs

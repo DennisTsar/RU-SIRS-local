@@ -1,7 +1,6 @@
 package misc
 
 import EntriesMap
-import Entry
 import remote.sources.LocalFileSource
 
 fun validateMapOfEntries(
@@ -25,8 +24,8 @@ fun validateMapOfEntries(
 
 fun compareDataDirs(dir1: String, dir2: String, compareSizes: Boolean = true) {
     val localSource = LocalFileSource()
-    val map1 = localSource.getAllEntries<Entry>(dir1)
-    val map2 = localSource.getAllEntries<Entry>(dir2)
+    val map1 = localSource.getAllEntries(dir1)
+    val map2 = localSource.getAllEntries(dir2)
 
     // region silliness
     val compareSchoolMap: Map<*, Map<*, List<*>>>.(Map<*, *>, String, String) -> Unit =

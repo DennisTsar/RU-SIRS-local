@@ -39,7 +39,7 @@ private fun EntryOld3.toEntry(): Entry {
 
 private fun getSpring2014Map(): EntriesMap {
     return LocalFileSource()
-        .getAllEntries<EntryOld3>("old-json/json-data-4") // last compilation of original Spring 2014 data
+        .getAllGenericEntries<EntryOld3>("old-json/json-data-4") // last compilation of original Spring 2014 data
         .mapValues { (_, deptMap) ->
             deptMap.mapValues { (_, entries) ->
                 entries

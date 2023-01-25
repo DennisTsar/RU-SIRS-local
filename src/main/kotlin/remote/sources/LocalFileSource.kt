@@ -1,93 +1,94 @@
 package remote.sources
 
 import EntriesByProf
-import EntriesByProfMap
 import Entry
 import Instructor
+import InstructorStats
 import School
 import SchoolDeptsMap
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import misc.walkDirectory
-import remote.InstructorStats
+import remote.WebsitePaths
 import java.io.File
 import java.io.FileNotFoundException
 
 class LocalFileSource(
-    val mainJsonDir: String = "json-data/data-9",
-    private val extraJsonDir: String = "json-data/extra-data",
-    private val baseJsonDir: String = "json-data",
-) : NonBlockingSource {
-    override fun getEntriesLocal(school: String, dept: String, folderNum: Int): List<Entry> =
-        Json.decodeFromString(File("json-data/data-$folderNum/$school/$dept.json").readText())
+    private val sitePaths: WebsitePaths = WebsitePaths(),
+    private val entriesDir: String = "json-data/data-9",
+    private val entriesByProfDir: String = "$entriesDir-by-prof",
+) {
+    // maybe make this internal for extensions functions
+    private inline fun <reified T> String.decodeFromFile(): T = Json.decodeFromString(File(this).readText())
 
-    inline fun <reified T> getAllEntries(readDir: String = mainJsonDir): Map<String, Map<String, List<T>>> {
-        return File(readDir).walkDirectory().associate { file ->
-            val deptMap = file.walkDirectory().associate {
-                it.nameWithoutExtension to Json.decodeFromString<List<T>>(it.readText())
-            }
-            file.nameWithoutExtension to deptMap
-        }.filterValues { it.isNotEmpty() }
-    }
+    // region website source
+    fun getStatsByProf(
+        school: String,
+        dept: String,
+        dir: String = sitePaths.statsByProfDir,
+    ): Map<String, InstructorStats> = "$dir/$school/$dept.json".decodeFromFile()
 
-    override fun getEntriesByProfLocal(school: String, dept: String, folderNum: Int): EntriesByProf =
-        Json.decodeFromString(File("json-data/data-$folderNum-by-prof/$school/$dept.json").readText())
-
-    fun getAllEntriesByProf(readDir: String = "$mainJsonDir-by-prof"): EntriesByProfMap {
-        return File(readDir).walkDirectory().associate { file ->
-            val deptMap = file.walkDirectory().associate {
-                it.nameWithoutExtension to Json.decodeFromString<EntriesByProf>(it.readText())
-            }
-            file.nameWithoutExtension to deptMap
-        }.filterValues { it.isNotEmpty() }
-    }
-
-    override fun getStatsByProfLocal(school: String, dept: String): Map<String, InstructorStats> =
-        Json.decodeFromString(File("$mainJsonDir-by-prof-stats/$school/$dept.json").readText())
-
-    fun getAllStatsByProf(readDir: String = "$mainJsonDir-by-prof-stats"): SchoolDeptsMap<Map<String, InstructorStats>> {
-        return File(readDir).walkDirectory().associate { file ->
-            val deptMap = file.walkDirectory().associate {
-                it.nameWithoutExtension to Json.decodeFromString<Map<String, InstructorStats>>(it.readText())
-            }
-            file.nameWithoutExtension to deptMap
-        }.filterValues { it.isNotEmpty() }
-    }
-
-    override fun getSchoolMapLocal(): Map<String, School> =
-        Json.decodeFromString(File("$extraJsonDir/schoolMap.json").readText())
-
-    @Deprecated(
-        "Data is now stored in separate files by dept. This function is kept to get F22 data.",
-        replaceWith = ReplaceWith("getTeachingDataLocal"),
-    )
-    override fun getLatestInstructorsLocal(term: String): Map<String, List<String>> =
-        Json.decodeFromString(File("$extraJsonDir/$term-instructors.json").readText())
-
-
-    override fun getTeachingDataLocal(school: String, dept: String, term: String): Map<String, List<String>> {
+    fun getCourseNames(school: String, dept: String, dir: String = sitePaths.courseNamesDir): Map<String, String> {
         return try {
-            Json.decodeFromString(File("$extraJsonDir/$term-teaching/$school/$dept.json").readText())
+            "$dir/$school/$dept.json".decodeFromFile()
         } catch (e: FileNotFoundException) {
             emptyMap()
         }
     }
 
-    override fun getCourseNamesLocal(school: String, dept: String): Map<String, String> {
+    fun getTeachingData(
+        school: String,
+        dept: String,
+        dir: String = sitePaths.teachingDataDir,
+    ): Map<String, List<String>> {
         return try {
-            Json.decodeFromString(File("$extraJsonDir/courseNames/$school/$dept.json").readText())
+            "$dir/$school/$dept.json".decodeFromFile()
         } catch (e: FileNotFoundException) {
             emptyMap()
         }
     }
 
-    override fun getDeptMapLocal(): Map<String, String> =
-        Json.decodeFromString(File("$extraJsonDir/deptNameMap.json").readText())
+    fun getAllInstructors(path: String = sitePaths.allInstructorsFile): Map<String, List<Instructor>> =
+        path.decodeFromFile()
 
-    override fun getAllInstructorsLocal(dir: String): Map<String, List<Instructor>> =
-        Json.decodeFromString(File("$baseJsonDir/$dir/allInstructors.json").readText())
+    fun getDeptMap(path: String = sitePaths.deptMapFile): Map<String, String> = path.decodeFromFile()
 
+    fun getSchoolMap(path: String = sitePaths.schoolMapFile): Map<String, School> = path.decodeFromFile()
+    // endregion
 
-    override fun getSchoolMapLocal(dataDir: String): Map<String, School> =
-        Json.decodeFromString(File("$baseJsonDir/$dataDir/schoolMap.json").readText())
+    private inline fun <reified T> getCompleteSchoolDeptsMap(dir: String): SchoolDeptsMap<T> {
+        return File(dir).walkDirectory().associate { file ->
+            val deptMap = file.walkDirectory().associate {
+//                println(it.absolutePath)
+//                println(it.canonicalPath)
+                it.nameWithoutExtension to Json.decodeFromString<T>(it.readText())
+            }
+            file.nameWithoutExtension to deptMap
+        }.filterValues { it.isNotEmpty() }
+    }
+
+    fun getEntries(school: String, dept: String, dir: String = entriesDir): List<Entry> =
+        getGenericEntries(school, dept, dir)
+
+    fun getAllEntries(dir: String = entriesDir): SchoolDeptsMap<List<Entry>> = getCompleteSchoolDeptsMap(dir)
+
+    /** For accessing entries stored in an old format */
+    fun <T> getGenericEntries(school: String, dept: String, dir: String = entriesDir): List<T> =
+        "$dir/$school/$dept.json".decodeFromFile()
+
+    /** For accessing entries stored in an old format */
+    fun <T> getAllGenericEntries(dir: String = entriesDir): SchoolDeptsMap<List<T>> = getCompleteSchoolDeptsMap(dir)
+
+    fun getEntriesByProf(school: String, dept: String, dir: String = entriesByProfDir): EntriesByProf =
+        "$dir/$school/$dept.json".decodeFromFile()
+
+    fun getAllEntriesByProf(dir: String = entriesByProfDir): SchoolDeptsMap<EntriesByProf> =
+        getCompleteSchoolDeptsMap(dir)
+
+    fun getAllStatsByProf(dir: String = sitePaths.statsByProfDir): SchoolDeptsMap<Map<String, InstructorStats>> =
+        getCompleteSchoolDeptsMap(dir)
+
+    /** Access teaching data stored in an old format (All depts in one file) */
+    fun getTeachingDataOldFormat(term: String): Map<String, List<String>> =
+        "$sitePaths/$term-instructors.json".decodeFromFile()
 }

@@ -3,6 +3,7 @@
 package general
 
 import Instructor
+import InstructorStats
 import SchoolDeptsMap
 import Semester
 import SemesterType
@@ -12,19 +13,28 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import mapEachDept
 import remote.GithubSource
-import remote.InstructorStats
+import remote.WebsitePaths
+import remote.getAllData
 import remote.sources.LocalFileSource
+import remote.sources.LocalWebsiteSource
 import java.io.File
 import kotlin.random.Random
 
+private val fakeLocalSource = LocalFileSource(
+    sitePaths = WebsitePaths(
+        baseDir = "../fake-data",
+        allInstructorsFile = "../fake-data/data-9-by-prof-stats/allInstructors.json", // will be removed soon
+    )
+)
+
 fun generateFakeStatsData(localSource: LocalFileSource = LocalFileSource()): Map<String, InstructorStats> {
-    val limitedSchools = localSource.getSchoolMapLocal("data-9-by-prof").toList()
+    val limitedSchools = localSource.getSchoolMap().toList()
         .shuffled().take(5)
         .map { (_, school) -> school.copy(depts = school.depts.shuffled().take(5).toSet()) }
 
     val fakeData: SchoolDeptsMap<Map<String, InstructorStats>> = limitedSchools.associate { school ->
         school.code to school.depts.associateWith { dept ->
-            val courses = localSource.getCourseNamesLocal(school.code, dept).keys.shuffled().take(5)
+            val courses = localSource.getCourseNames(school.code, dept).keys.shuffled().take(5)
                 .ifEmpty { listOf("111") }
             println(courses)
 
@@ -52,13 +62,13 @@ fun generateFakeStatsData(localSource: LocalFileSource = LocalFileSource()): Map
     return emptyMap()
 }
 
-fun generateFakeExtraData(localSource: LocalFileSource = LocalFileSource()) {
-    val allStats = localSource.getAllStatsByProf("../fake-data/data-9-by-prof-stats")
-    val schoolMap = localSource.getSchoolMapLocal("../../fake-data/data-9-by-prof-stats")
+fun generateFakeExtraData(localSource: LocalFileSource = fakeLocalSource) {
+    val allStats = localSource.getAllStatsByProf()
+    val schoolMap = localSource.getSchoolMap()
 
     val limitedCourseNames: SchoolDeptsMap<Map<String, String>> = schoolMap.toList()
         .associate { (code, school) ->
-            code to school.depts.associateWith { localSource.getCourseNamesLocal(code, it) }
+            code to school.depts.associateWith { localSource.getCourseNames(code, it) }
         }.writeToDir("../fake-data/extra-data/courseNames", writeSchoolMap = false)
 
     val teachingMap: SchoolDeptsMap<Map<String, List<String>>> = allStats.mapEachDept { _, _, statsByProf ->
@@ -91,59 +101,26 @@ fun generateFakeExtraData(localSource: LocalFileSource = LocalFileSource()) {
     val file = File("../fake-data/data-9-by-prof-stats/allInstructors.json")
     file.writeText(Json.encodeToString(allInstructors))
 
-    val deptNames = localSource.getDeptMapLocal()
+    val deptNames = localSource.getDeptMap()
     val file2 = File("../fake-data/extra-data/deptNameMap.json")
     file2.writeText(Json.encodeToString(deptNames))
 }
 
 // make sure this doesn't crash
-fun getAllFakeData(print: Boolean = false) {
-    val localSource = LocalFileSource(
-        mainJsonDir = "../fake-data/data-9",
-        extraJsonDir = "../fake-data/extra-data",
-        baseJsonDir = "../fake-data"
-    )
-    val schoolDeptsMap = localSource.getAllStatsByProf()
-    val specificSchoolStats = localSource.getStatsByProfLocal(school = "04", dept = "189")
-    val schoolMap = localSource.getSchoolMapLocal("data-9-by-prof-stats")
-    val allInstructors = localSource.getAllInstructorsLocal("data-9-by-prof-stats")
-    val specificCourseNames = localSource.getCourseNamesLocal(school = "04", dept = "189")
-    val specificTeachingProfs = localSource.getTeachingDataLocal(school = "04", dept = "189", "S23")
-    val deptNames = localSource.getDeptMapLocal()
-
-    if (print) {
-        println(schoolDeptsMap)
-        println(specificSchoolStats)
-        println(schoolMap)
-        println(allInstructors)
-        println(specificCourseNames)
-        println(specificTeachingProfs)
-        println(deptNames)
-    }
+fun getAllFakeData(localSource: LocalFileSource = fakeLocalSource, print: Boolean = true) {
+    localSource.getAllStatsByProf().also { if (print) println(it) }
+    runBlocking { LocalWebsiteSource(localSource).getAllData(school = "04", dept = "189", print = print) }
 }
 
 fun getFakeDataFromGH() {
     val fakeGHSource = GithubSource(
         repoPath = "/DennisTsar/RU-SIRS/master/",
-        mainJsonDir = "fake-data/data-9",
-        extraJsonDir = "fake-data/extra-data",
-        baseJsonDir = "fake-data"
+        paths = WebsitePaths(
+            baseDir = "fake-data",
+            allInstructorsFile = "fake-data/data-9-by-prof-stats/allInstructors.json" // will not be required soon
+        ),
     )
-//    val schoolDeptsMap = fakeGHSource.getAllStatsByProf()
-    runBlocking {
-        val specificSchoolStats = fakeGHSource.getStatsByProf(school = "08", dept = "208")
-        val schoolMap = fakeGHSource.getSchoolMap("data-9-by-prof-stats")
-        val allInstructors = fakeGHSource.getAllInstructors("data-9-by-prof-stats")
-        val specificCourseNames = fakeGHSource.getCourseNames("08", "208")
-        val specificTeachingProfs = fakeGHSource.getTeachingData("08", "208", "S23")
-        val deptNames = fakeGHSource.getDeptMap()
-        println(specificSchoolStats)
-        println(schoolMap)
-        println(allInstructors)
-        println(specificCourseNames)
-        println(specificTeachingProfs)
-        println(deptNames)
-    }
+    runBlocking { fakeGHSource.getAllData(school = "04", dept = "189", print = true) }
 }
 
 // Names from https://catonmat.net/tools/generate-random-names

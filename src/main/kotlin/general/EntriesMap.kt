@@ -13,7 +13,7 @@ inline fun <reified T> SchoolDeptsMap<T>.writeToDir(
     skipIfEmpty: Boolean = true,
 ): SchoolDeptsMap<T> {
     if (writeSchoolMap) {
-        val dirMap = LocalFileSource().getSchoolMapLocal().mapValues { (code, school) ->
+        val dirMap = LocalFileSource().getSchoolMap().mapValues { (code, school) ->
             val filteredDepts = school.depts.filter { this[code]?.keys?.contains(it) == true }
             school.copy(depts = filteredDepts.toSet())
         }.filterValues { it.depts.isNotEmpty() }
