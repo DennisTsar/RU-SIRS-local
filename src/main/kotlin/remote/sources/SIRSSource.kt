@@ -138,9 +138,4 @@ class SIRSSource(private val API_KEY: String) : RemoteApi {
     ): List<Entry> {
         return semesters.pmap { getEntriesByDeptOrCourse(it, school, dept) }.flatten()
     }
-
-    suspend fun getSchoolMap(): Map<String, School> = getSchoolMapUsingSOC()
-
-    suspend fun getLatestEntries(school: String, dept: String): List<Entry> =
-        getEntriesOverSems(school, dept)
 }
