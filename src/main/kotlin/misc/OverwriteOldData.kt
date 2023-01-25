@@ -1,6 +1,6 @@
 package misc
 
-import Entry
+import data.Entry
 import data.old_data.EntryOld1
 import data.old_data.EntryOld2
 import data.old_data.EntryOld3

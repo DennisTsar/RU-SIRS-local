@@ -1,9 +1,9 @@
 package general
 
-import Entry
-import getRatingStats
-import getTotalRatings
-import roundToDecimal
+import data.Entry
+import data.getRatingStats
+import data.getTotalRatings
+import data.roundToDecimal
 
 fun List<Entry>.toCsv(): String? {
     val profRatings = mapByProf()

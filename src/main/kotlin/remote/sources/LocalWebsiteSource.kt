@@ -1,8 +1,8 @@
 package remote.sources
 
-import Instructor
-import InstructorStats
-import School
+import data.Instructor
+import data.InstructorStats
+import data.School
 import remote.WebsiteDataSource
 
 class LocalWebsiteSource(private val completeSource: LocalFileSource = LocalFileSource()) : WebsiteDataSource {

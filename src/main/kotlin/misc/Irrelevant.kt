@@ -1,6 +1,6 @@
 package misc
 
-import EntriesMap
+import data.EntriesMap
 import remote.sources.LocalFileSource
 
 fun validateMapOfEntries(

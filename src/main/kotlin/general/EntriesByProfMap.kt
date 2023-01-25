@@ -1,10 +1,6 @@
 package general
 
-import EntriesByProf
-import EntriesByProfMap
-import EntriesMap
-import Entry
-import mapEachDept
+import data.*
 
 private val extraSpaceNameParts = setOf("MC", "O'")
 private val forwardSpecialNameParts = extraSpaceNameParts + setOf("DER", "DE", "DA", "DEL", "LA", "UZ", "EL", "VAN")
@@ -118,7 +114,7 @@ fun List<Entry>.autoNameAdjustments(): Map<String, String> {
 
 private fun Entry.formatFullName(): String {
     // un-separate the specials from other parts of the name - accounts for first/last names with spaces within them
-    // first combine them forwards, then backwards
+    // first data.combine them forwards, then backwards
     fun List<String>.foldInSpecialNameParts(): List<String> {
         return fold(emptyList<String>()) { acc, s ->
             acc.lastOrNull()

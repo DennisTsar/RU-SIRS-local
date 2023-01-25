@@ -1,9 +1,10 @@
 package remote.sources
 
-import Campus
-import Semester
+import data.Campus
+import data.Semester
 import data.soc.Course
 import data.soc.SOCData
+import data.substringAfterBefore
 import general.DefaultParams
 import io.ktor.client.call.*
 import io.ktor.client.plugins.compression.*
@@ -13,7 +14,6 @@ import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import remote.RemoteApi
-import substringAfterBefore
 
 private const val SOC_BASE_URL = "https://sis.rutgers.edu/soc"
 

@@ -48,7 +48,7 @@
 
 ## json-data-6
 
-* Assigned all existing questions a number (`index` in `QsMap`) to be used in `questions` parameter
+* Assigned all existing questions a number (`index` in `data.getQsMap`) to be used in `questions` parameter
     * Despite all values in `questions` being Ints, they are kept as Strings to conform to `Entry` class
 
 ## json-data-7

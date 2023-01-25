@@ -1,8 +1,8 @@
 package data.soc
 
 
-import Campus
-import LevelOfStudy
+import data.Campus
+import data.LevelOfStudy
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

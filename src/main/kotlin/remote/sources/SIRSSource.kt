@@ -1,9 +1,6 @@
 package remote.sources
 
-import Entry
-import LevelOfStudy
-import School
-import Semester
+import data.*
 import data.sirs_courseFilter.SIRSCourseFilterResult
 import general.DefaultParams
 import io.ktor.client.call.*
@@ -14,9 +11,7 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.*
 import kotlinx.serialization.json.Json
-import pmap
 import remote.RemoteApi
-import substringAfterBefore
 
 class SIRSSource(private val API_KEY: String) : RemoteApi {
     private val sirsClient = client.config {

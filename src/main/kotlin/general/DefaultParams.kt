@@ -1,9 +1,9 @@
 package general
 
-import Campus
-import LevelOfStudy
-import Semester
-import SemesterType
+import data.Campus
+import data.LevelOfStudy
+import data.Semester
+import data.SemesterType
 
 object DefaultParams {
     val semester = Semester(SemesterType.Spring, 2023)

@@ -2,16 +2,10 @@
 
 package general
 
-import Instructor
-import InstructorStats
-import SchoolDeptsMap
-import Semester
-import SemesterType
-import combine
+import data.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import mapEachDept
 import remote.GithubSource
 import remote.WebsitePaths
 import remote.getAllData

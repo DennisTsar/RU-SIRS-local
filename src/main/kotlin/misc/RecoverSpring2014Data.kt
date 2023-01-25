@@ -1,9 +1,9 @@
 package misc
 
-import EntriesMap
-import Entry
-import QsMap
-import TenQs
+import data.EntriesMap
+import data.Entry
+import data.QsMap
+import data.TenQs
 import data.old_data.EntryOld3
 import general.writeToDir
 import remote.sources.LocalFileSource

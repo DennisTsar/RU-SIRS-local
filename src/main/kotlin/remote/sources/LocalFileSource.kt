@@ -1,11 +1,6 @@
 package remote.sources
 
-import EntriesByProf
-import Entry
-import Instructor
-import InstructorStats
-import School
-import SchoolDeptsMap
+import data.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import misc.walkDirectory

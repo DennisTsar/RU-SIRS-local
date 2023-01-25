@@ -1,7 +1,7 @@
 package general
 
-import EntriesMap
-import SchoolDeptsMap
+import data.EntriesMap
+import data.SchoolDeptsMap
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import misc.makeFileAndDir

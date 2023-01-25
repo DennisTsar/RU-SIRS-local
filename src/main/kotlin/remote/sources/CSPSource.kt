@@ -1,8 +1,8 @@
 package remote.sources
 
-import Campus
-import LevelOfStudy
-import SemesterType
+import data.Campus
+import data.LevelOfStudy
+import data.SemesterType
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import remote.RemoteApi

@@ -1,26 +1,11 @@
 package general
 
-import Campus
-import EntriesByProfMap
-import EntriesMap
-import Entry
-import Instructor
-import InstructorStats
-import School
-import SchoolDeptsMap
-import Semester
-import flatMapEachDept
-import forEachDept
-import generateSchoolMap
-import getTotalRatings
+import data.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import mapEachDept
 import misc.makeFileAndDir
 import misc.similarity
-import pmap
-import prev
 import remote.sources.LocalFileSource
 import remote.sources.SIRSSource
 import remote.sources.SOCSource
@@ -190,7 +175,7 @@ fun generateLatestProfCourseMappings(
         }.filterValues { it.isNotEmpty() }
         .also { println("${it.size} courses with profs, ${it.count { (_, v) -> v.size > 1 }} with 2+ profs") }
 
-    val finalMap = runBlocking { // doesn't make network call, but generateSchoolMap is aync
+    val finalMap = runBlocking { // doesn't make network call, but data.generateSchoolMap is aync
         localSource.getSchoolMap().values
             .generateSchoolMap { school, dept ->
                 // not very efficient to do this for every dept, but simple and still quick
