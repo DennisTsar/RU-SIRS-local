@@ -11,7 +11,7 @@ fun EntriesMap.toEntriesByProfMap(): EntriesByProfMap {
         entries.filterNot { entry ->
             val prof = entry.instructor
             listOf("do not use", "error", "faculty", "proctortrack", "instructor").any { it in prof.lowercase() }
-                    || listOf("", ",", "-", "--", "TA", "(Recitation)").any { it == prof }
+                    || prof in listOf("", ",", "-", "--", "TA", "(Recitation)")
                     || prof.likelyMultipleProfs()
                     || entry.scores.size < 100 // for now
         }.mapByProf()
@@ -44,12 +44,12 @@ fun List<Entry>.mapByProf(): EntriesByProf {
 // ex. "SMITH, J" turns to "SMITH, JOHN" if there are no other "SMITH, J..."s
 // 3. Ignores dashes and apostrophes when matching, but includes those special chars in the final name if present
 // ex. "OREILLYJAMES, JOHN" turns to "O'REILLY-JAMES, JOHN" if the latter is present
-// 4. Matches first names if one is a substring (0,n) of the other
-// ex. "SMITH, JOHN" turns to "SMITH, JOHNNY" if the latter is present
+// 4. Matches first names (for common last) if one is a substring of the other
+// ex. "SMITH, JOHN" turns to "SMITH, JOHNNY" if the latter is present (also Ron/Ronald, Ken/Kenneth, etc.)
 // 5. Assumes if a last name consists of only one letter, it's actually the first name, and treats the supposed
 // first name as the last name. Note that all other rules are applied to this new name.
 // ex. "J, SMITH" is assumed to be "SMITH, J" and will turn to "SMITH, JOHN" if the latter is present
-fun List<Entry>.autoNameAdjustments(): Map<String, String> {
+private fun List<Entry>.autoNameAdjustments(): Map<String, String> {
     val names = map { it.formatFullName() }
 
     val specialChars = setOf('-', '\'')
@@ -58,9 +58,7 @@ fun List<Entry>.autoNameAdjustments(): Map<String, String> {
     val specialCharMap = names.filter { name -> specialChars.any { it in name } }
         .associateBy { it.removeSpecialChars() }
 
-    // assume that all names where last name is only one letter must have been flipped
-    // ex. "J, SMITH" is actually "SMITH, J"
-    // so we add "SMITH, J" to the list of names and keep track of it, so we can later map it back as "J, SMITH"
+    // #5
     val (flippedNames, properNames) = names
         .map { it.removeSpecialChars() }
         .partition { it.substringBefore(", ", "").length == 1 }
@@ -82,7 +80,7 @@ fun List<Entry>.autoNameAdjustments(): Map<String, String> {
                     .minus(initial.toString()) // we don't care about with only initial for first name matching
                     .sortedBy { it.length } // sorted to check if shortest name matches longer & to use the longest name
                     .takeIf { it.isNotEmpty() } // when only initial is present -> need to differentiate from false
-                // treat names like "Ron/Ronald", "Ken/Kenneth", etc. as same name
+                // #4
                 when (fullFirsts?.all { it.startsWith(fullFirsts[0]) }) {
                     true -> commonInitial.associateWith { fullFirsts.last() }
                     false -> emptyMap()
@@ -114,7 +112,7 @@ fun List<Entry>.autoNameAdjustments(): Map<String, String> {
 
 private fun Entry.formatFullName(): String {
     // un-separate the specials from other parts of the name - accounts for first/last names with spaces within them
-    // first data.combine them forwards, then backwards
+    // first combine them forwards, then backwards
     fun List<String>.foldInSpecialNameParts(): List<String> {
         return fold(emptyList<String>()) { acc, s ->
             acc.lastOrNull()
@@ -131,6 +129,7 @@ private fun Entry.formatFullName(): String {
                 ?: (listOf(s) + acc)
         }
     }
+
     val name = instructor
         .trim()
         .replace(" \\(.*\\)|,|\\.".toRegex(), "") // remove stuff in parentheses + remove commas & periods
