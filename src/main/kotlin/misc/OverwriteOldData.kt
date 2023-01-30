@@ -4,6 +4,7 @@ import data.Entry
 import data.old_data.EntryOld1
 import data.old_data.EntryOld2
 import data.old_data.EntryOld3
+import data.prepend
 import general.writeToDir
 import remote.sources.LocalFileSource
 
@@ -66,7 +67,7 @@ fun completeOverwrite(overwriteRange: List<Int> = (1..6).toList()) {
                     enrolled = enrolled,
                     responses = responses,
                     scores = scores,
-                    questions = listOf("UNKNOWN_BUT_EXTRA_QS") + extraQs,
+                    questions = extraQs.prepend("UNKNOWN_BUT_EXTRA_QS"),
                 )
             }
 

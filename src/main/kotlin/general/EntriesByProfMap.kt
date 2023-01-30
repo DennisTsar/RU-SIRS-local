@@ -125,8 +125,8 @@ private fun Entry.formatFullName(): String {
         }.foldRight(emptyList()) { s, acc ->
             acc.firstOrNull()
                 ?.takeIf { it.substringBefore(" ") in backwardSpecialNameParts }
-                ?.let { listOf("$s $it") + acc.drop(1) }
-                ?: (listOf(s) + acc)
+                ?.let { acc.drop(1).prepend("$s $it") }
+                ?: acc.prepend(s)
         }
     }
 
