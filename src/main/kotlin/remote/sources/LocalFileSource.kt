@@ -23,7 +23,11 @@ class LocalFileSource(
         dir: String = sitePaths.statsByProfDir,
     ): Map<String, InstructorStats> = "$dir/$school/$dept.json".decodeFromFile()
 
-    fun getCourseNames(school: String, dept: String, dir: String = sitePaths.courseNamesDir): Map<String, String> {
+    fun getCourseNamesOrEmpty(
+        school: String,
+        dept: String,
+        dir: String = sitePaths.courseNamesDir,
+    ): Map<String, String> {
         return try {
             "$dir/$school/$dept.json".decodeFromFile()
         } catch (e: FileNotFoundException) {
@@ -31,7 +35,7 @@ class LocalFileSource(
         }
     }
 
-    fun getTeachingData(
+    fun getTeachingDataOrEmpty(
         school: String,
         dept: String,
         dir: String = sitePaths.teachingDataDir,

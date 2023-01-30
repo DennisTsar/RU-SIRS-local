@@ -28,7 +28,7 @@ fun generateFakeStatsData(localSource: LocalFileSource = LocalFileSource()): Map
 
     val fakeData: SchoolDeptsMap<Map<String, InstructorStats>> = limitedSchools.associate { school ->
         school.code to school.depts.associateWith { dept ->
-            val courses = localSource.getCourseNames(school.code, dept).keys.shuffled().take(5)
+            val courses = localSource.getCourseNamesOrEmpty(school.code, dept).keys.shuffled().take(5)
                 .ifEmpty { listOf("111") }
             println(courses)
 
@@ -62,7 +62,7 @@ fun generateFakeExtraData(localSource: LocalFileSource = fakeLocalSource) {
 
     val limitedCourseNames: SchoolDeptsMap<Map<String, String>> = schoolMap.toList()
         .associate { (code, school) ->
-            code to school.depts.associateWith { localSource.getCourseNames(code, it) }
+            code to school.depts.associateWith { localSource.getCourseNamesOrEmpty(code, it) }
         }.writeToDir("../fake-data/extra-data/courseNames", writeSchoolMap = false)
 
     val teachingMap: SchoolDeptsMap<Map<String, List<String>>> = allStats.mapEachDept { _, _, statsByProf ->
