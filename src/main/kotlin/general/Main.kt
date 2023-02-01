@@ -210,10 +210,10 @@ fun EntriesByProfMap.printPossibleNameAdjustments(printURL: Boolean = true) {
         pairs.filter { (first, second) ->
             val a = first.split(" ", ",").filter { it.isNotBlank() }
             val b = second.split(" ", ",").filter { it.isNotBlank() }
-            similarity(a[0], b[0]) > .75
-                    || (similarity(a[0], b[0]) > .33 && similarity(a.getOrNull(1), b.getOrNull(1)) > .75)
+            similarity(a[0], b[0]) > 0.75
+                    || (similarity(a[0], b[0]) > 0.33 && similarity(a.getOrNull(1), b.getOrNull(1)) > 0.75)
                     // checks for flipped first/last names
-                    || (similarity(a[0], b.getOrNull(1)) > .75 && similarity(a.getOrNull(1), b[0]) > .75)
+                    || (similarity(a[0], b.getOrNull(1)) > 0.75 && similarity(a.getOrNull(1), b[0]) > 0.75)
         }.ifEmpty { null }?.let { filtered ->
             println("\n\"$school:$dept\" -> when (prof) {")
             filtered.sortedBy { it.second }.forEach { (a, b) ->
