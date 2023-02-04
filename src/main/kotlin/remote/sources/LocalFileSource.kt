@@ -90,4 +90,13 @@ class LocalFileSource(
     /** Access teaching data stored in an old format (All depts in one file) */
     fun getTeachingDataOldFormat(term: String): Map<String, List<String>> =
         "$sitePaths/$term-instructors.json".decodeFromFile()
+
+    companion object {
+        val FakeSource = LocalFileSource(
+            sitePaths = WebsitePaths(
+                baseDir = "../fake-data",
+                allInstructorsFile = "../fake-data/data-9-by-prof-stats/allInstructors.json", // will be removed soon
+            )
+        )
+    }
 }

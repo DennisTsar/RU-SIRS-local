@@ -7,19 +7,11 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import remote.GithubSource
-import remote.WebsitePaths
 import remote.getAllData
 import remote.sources.LocalFileSource
 import remote.sources.LocalWebsiteSource
 import java.io.File
 import kotlin.random.Random
-
-private val fakeLocalSource = LocalFileSource(
-    sitePaths = WebsitePaths(
-        baseDir = "../fake-data",
-        allInstructorsFile = "../fake-data/data-9-by-prof-stats/allInstructors.json", // will be removed soon
-    )
-)
 
 fun generateFakeStatsData(localSource: LocalFileSource = LocalFileSource()): Map<String, InstructorStats> {
     val limitedSchools = localSource.getSchoolMap().toList()
@@ -56,7 +48,7 @@ fun generateFakeStatsData(localSource: LocalFileSource = LocalFileSource()): Map
     return emptyMap()
 }
 
-fun generateFakeExtraData(localSource: LocalFileSource = fakeLocalSource) {
+fun generateFakeExtraData(localSource: LocalFileSource = LocalFileSource.FakeSource) {
     val allStats = localSource.getAllStatsByProf()
     val schoolMap = localSource.getSchoolMap()
 
@@ -101,20 +93,13 @@ fun generateFakeExtraData(localSource: LocalFileSource = fakeLocalSource) {
 }
 
 // make sure this doesn't crash
-fun getAllFakeData(localSource: LocalFileSource = fakeLocalSource, print: Boolean = true) {
+fun getAllFakeData(localSource: LocalFileSource = LocalFileSource.FakeSource, print: Boolean = true) {
     localSource.getAllStatsByProf().also { if (print) println(it) }
     runBlocking { LocalWebsiteSource(localSource).getAllData(school = "04", dept = "189", print = print) }
 }
 
 fun getFakeDataFromGH() {
-    val fakeGHSource = GithubSource(
-        repoPath = "/DennisTsar/RU-SIRS/master/",
-        paths = WebsitePaths(
-            baseDir = "fake-data",
-            allInstructorsFile = "fake-data/data-9-by-prof-stats/allInstructors.json" // will not be required soon
-        ),
-    )
-    runBlocking { fakeGHSource.getAllData(school = "04", dept = "189", print = true) }
+    runBlocking { GithubSource.FakeSource.getAllData(school = "04", dept = "189", print = true) }
 }
 
 // Names from https://catonmat.net/tools/generate-random-names
